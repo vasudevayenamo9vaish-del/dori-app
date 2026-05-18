@@ -1,0 +1,126 @@
+.discover-screen {
+  display: flex;
+  flex-direction: column;
+}
+
+.discover-header {
+  margin-bottom: 24px;
+}
+
+.discover-header h2 {
+  font-size: 24px;
+  color: var(--primary-teal);
+  margin-bottom: 4px;
+}
+
+.discover-header p {
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.filtered-mood {
+  color: var(--accent-terracotta) !important;
+}
+
+.filtered-mood span {
+  font-weight: 500;
+  font-style: italic;
+}
+
+.cards-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding-bottom: 20px;
+}
+
+.profile-card {
+  background: linear-gradient(to bottom, #FFFFFF, #FCF8F5);
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(217, 119, 106, 0.08);
+  border: 1px solid rgba(217, 119, 106, 0.1);
+  transition: box-shadow 0.3s ease;
+  cursor: pointer;
+}
+
+.card-emotion-header {
+  padding: 14px 20px;
+  background-color: var(--bg-cream);
+  color: var(--primary-teal);
+  font-size: 14px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid rgba(0,0,0,0.03);
+}
+
+.sparkle-icon {
+  color: var(--accent-gold);
+}
+
+.card-image-wrapper {
+  position: relative;
+  height: 220px;
+  width: 100%;
+}
+
+.card-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.card-info {
+  padding: 24px 20px 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.card-name {
+  font-size: 20px;
+  color: var(--text-dark);
+  margin-bottom: 8px;
+}
+
+.card-bio {
+  font-size: 14px;
+  color: var(--text-muted);
+  line-height: 1.5;
+  margin-bottom: 24px;
+}
+
+.connect-gently-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background-color: transparent;
+  color: var(--accent-terracotta);
+  border: 1px solid var(--accent-terracotta);
+  padding: 14px;
+  border-radius: 20px;
+  font-size: 15px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.connect-gently-btn:hover {
+  background-color: rgba(217, 119, 106, 0.08);
+  box-shadow: var(--shadow-glow);
+}
+
+.no-profiles {
+  text-align: center;
+  padding: 60px 0;
+  color: var(--text-muted);
+}
+
+.rest-message {
+  display: block;
+  margin-top: 8px;
+  font-style: italic;
+  color: var(--primary-teal);
+  opacity: 0.6;
+}

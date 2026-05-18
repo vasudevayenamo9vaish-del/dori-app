@@ -1,0 +1,110 @@
+.home-screen {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  height: 100%;
+}
+
+.home-content {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 320px;
+}
+
+.home-title {
+  font-size: 28px;
+  font-weight: 400;
+  margin-bottom: 12px;
+  line-height: 1.3;
+}
+
+.home-subtitle {
+  color: var(--text-muted);
+  font-size: 15px;
+  margin-bottom: 40px;
+}
+
+.emotion-selector {
+  width: 100%;
+  margin-bottom: 30px;
+}
+
+.emotion-input {
+  width: 100%;
+  padding: 16px 20px;
+  border-radius: 20px;
+  border: 1px solid rgba(44, 74, 90, 0.1);
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(5px);
+  font-family: 'Outfit', sans-serif;
+  font-size: 16px;
+  color: var(--primary-teal);
+  transition: all 0.3s ease;
+  box-shadow: var(--shadow-sm);
+}
+
+.emotion-input:focus {
+  outline: none;
+  border-color: var(--accent-terracotta);
+  background: #FFFFFF;
+  box-shadow: var(--shadow-glow);
+}
+
+.emotion-input::placeholder {
+  color: #94A3B8;
+}
+
+.button-group {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.connect-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background-color: var(--primary-teal);
+  color: #FFFFFF;
+  padding: 22px 36px;
+  border-radius: 40px;
+  font-size: 18px;
+  font-weight: 400;
+  width: 100%;
+  box-shadow: 0 12px 35px rgba(44, 74, 90, 0.3), 0 0 25px rgba(217, 119, 106, 0.15);
+  position: relative;
+  overflow: hidden;
+  transition: all 0.4s ease;
+}
+
+.connect-btn::after {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%;
+  width: 50%; height: 100%;
+  background: linear-gradient(to right, transparent, rgba(255,255,255,0.2), transparent);
+  animation: shine 4s infinite;
+}
+
+@keyframes shine {
+  0% { left: -100%; }
+  20% { left: 200%; }
+  100% { left: 200%; }
+}
+
+.home-tagline {
+  font-size: 13.5px;
+  color: var(--accent-terracotta);
+  opacity: 0.8;
+  font-style: italic;
+  font-weight: 300;
+}
