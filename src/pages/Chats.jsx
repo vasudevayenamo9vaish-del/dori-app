@@ -1,75 +1,215 @@
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { Send, ArrowLeft } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Send, ArrowLeft, Video, Check, X, ShieldAlert } from 'lucide-react';
+import { supabase } from '../lib/supabase';
+import { useAuth } from '../contexts/AuthContext';
+import ThreadIcon from '../components/ThreadIcon';
 import './Chats.css';
 
-const INITIAL_MESSAGES = [
-  { id: 1, text: "Hi Julian, I saw you were feeling a bit adrift. I've been there.", sender: 'them', time: '10:02 AM' },
-  { id: 2, text: "Thank you for reaching out. It's been hard settling in.", sender: 'me', time: '10:05 AM' },
-  { id: 3, text: "Take it one gentle step at a time. The roots will grow naturally.", sender: 'them', time: '10:07 AM' }
-];
-
 const Chats = () => {
-  const [messages, setMessages] = useState(INITIAL_MESSAGES);
+  const { user, profile } = useAuth();
+  const [matches, setMatches] = useState([]);
+  const [pendingRequests, setPendingRequests] = useState([]);
+  const [activeChat, setActiveChat] = useState(null);
+  const [messages, setMessages] = useState([]);
   const [inputText, setInputText] = useState('');
+  const [safetyWarning, setSafetyWarning] = useState(false);
+  const messagesEndRef = useRef(null);
 
-  const handleSend = () => {
+  useEffect(() => {
+    fetchMatches();
+  }, []);
+
+  useEffect(() => {
+    if (activeChat) {
+      fetchMessages(activeChat.match_id);
+      
+      const channel = supabase
+        .channel(`chat_${activeChat.match_id}`)
+        .on('postgres_changes', { 
+          event: 'INSERT', 
+          schema: 'public', 
+          table: 'messages',
+          filter: `match_id=eq.${activeChat.match_id}`
+        }, (payload) => {
+          setMessages(prev => [...prev, payload.new]);
+          scrollToBottom();
+        })
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    }
+  }, [activeChat]);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const fetchMatches = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('matches')
+        .select(`
+          id, status, requester_id, receiver_id,
+          requester:requester_id (id, first_name, avatar_url, current_mood),
+          receiver:receiver_id (id, first_name, avatar_url, current_mood)
+        `)
+        .or(`requester_id.eq.${user.id},receiver_id.eq.${user.id}`);
+
+      if (error) throw error;
+
+      const pending = data.filter(m => m.status === 'pending' && m.receiver_id === user.id);
+      const accepted = data.filter(m => m.status === 'accepted').map(m => {
+        const otherUser = m.requester_id === user.id ? m.receiver : m.requester;
+        return { match_id: m.id, ...otherUser };
+      });
+
+      setPendingRequests(pending);
+      setMatches(accepted);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleAccept = async (matchId) => {
+    await supabase.from('matches').update({ status: 'accepted' }).eq('id', matchId);
+    fetchMatches();
+  };
+
+  const handleDecline = async (matchId) => {
+    await supabase.from('matches').update({ status: 'declined' }).eq('id', matchId);
+    fetchMatches();
+  };
+
+  const fetchMessages = async (matchId) => {
+    const { data, error } = await supabase
+      .from('messages')
+      .select('*')
+      .eq('match_id', matchId)
+      .order('created_at', { ascending: true });
+    
+    if (!error) {
+      setMessages(data);
+      scrollToBottom();
+    }
+  };
+
+  const handleSend = async () => {
     if (!inputText.trim()) return;
     
     const newMsg = {
-      id: Date.now(),
-      text: inputText,
-      sender: 'me',
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      match_id: activeChat.match_id,
+      sender_id: user.id,
+      text: inputText
     };
-    
-    setMessages([...messages, newMsg]);
+
     setInputText('');
+    await supabase.from('messages').insert([newMsg]);
   };
+
+  if (!activeChat) {
+    return (
+      <div className="screen-container match-list-screen">
+        <h2 className="screen-title">Connections</h2>
+        
+        {pendingRequests.length > 0 && (
+          <div className="pending-section">
+            <h3>Pending Requests</h3>
+            {pendingRequests.map(req => (
+              <div key={req.id} className="match-item pending">
+                <img src={req.requester.avatar_url} alt="avatar" />
+                <div className="match-info">
+                  <h4>{req.requester.first_name}</h4>
+                  <span>wants to connect</span>
+                </div>
+                <div className="action-btns">
+                  <button onClick={() => handleAccept(req.id)} className="accept-btn"><Check size={16}/></button>
+                  <button onClick={() => handleDecline(req.id)} className="decline-btn"><X size={16}/></button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <div className="accepted-section">
+          <h3>Your Threads</h3>
+          {matches.length === 0 ? (
+            <p className="empty-state">No threads yet. Visit Discover to connect.</p>
+          ) : (
+            matches.map(match => (
+              <div key={match.match_id} className="match-item" onClick={() => setActiveChat(match)}>
+                <img src={match.avatar_url} alt="avatar" />
+                <div className="match-info">
+                  <h4>{match.first_name}</h4>
+                  <span>{match.current_mood || 'Connected'}</span>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  const canVideoCall = messages.length >= 5;
 
   return (
     <div className="chat-container">
       {/* Header */}
       <div className="chat-header">
-        <button className="back-btn"><ArrowLeft size={20} /></button>
+        <button className="back-btn" onClick={() => setActiveChat(null)}><ArrowLeft size={20} /></button>
         <div className="chat-user-info">
-          <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=100&q=80" alt="Eleanor" className="chat-avatar" />
+          <img src={activeChat.avatar_url} alt={activeChat.first_name} className="chat-avatar" />
           <div>
-            <h3>Eleanor</h3>
-            <span className="status">Calm and here to listen</span>
+            <h3>{activeChat.first_name}</h3>
+            <span className="status">{activeChat.current_mood}</span>
           </div>
         </div>
+        {canVideoCall && (
+          <button className="video-btn"><Video size={20} /></button>
+        )}
       </div>
 
       {/* Messages */}
       <div className="messages-area">
+        <div className="static-safety-warning">
+          <ShieldAlert size={14} />
+          <span>For your safety, we recommend keeping conversations inside Dori 🌿</span>
+        </div>
+        
         <div className="chat-thread-line"></div>
-        {messages.map((msg, idx) => (
-          <motion.div 
-            key={msg.id}
-            className={`message-bubble ${msg.sender}`}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
-          >
-            <p>{msg.text}</p>
-            <span className="msg-time">{msg.time}</span>
-          </motion.div>
-        ))}
+        {messages.map((msg) => {
+          const isMe = msg.sender_id === user.id;
+          return (
+            <motion.div 
+              key={msg.id}
+              className={`message-bubble ${isMe ? 'me' : 'them'}`}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              <p>{msg.text}</p>
+            </motion.div>
+          );
+        })}
+        <div ref={messagesEndRef} />
       </div>
 
       {/* Input */}
       <div className="chat-input-area">
-        <input 
-          type="text" 
-          placeholder="Type gently..." 
-          value={inputText}
-          onChange={(e) => setInputText(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-        />
-        <button className="send-btn" onClick={handleSend}>
-          <Send size={18} />
-        </button>
+        <div className="input-wrapper">
+          <input 
+            type="text" 
+            placeholder="Type gently..." 
+            value={inputText}
+            onChange={(e) => setInputText(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+          />
+          <button className="send-btn" onClick={handleSend}>
+            <Send size={18} />
+          </button>
+        </div>
       </div>
     </div>
   );

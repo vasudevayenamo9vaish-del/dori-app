@@ -1,0 +1,117 @@
+.auth-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: var(--bg-cream);
+}
+
+.auth-box {
+  width: 100%;
+  max-width: 340px;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  padding: 40px 24px;
+  border-radius: 30px;
+  box-shadow: var(--shadow-md);
+  text-align: center;
+}
+
+.auth-header {
+  margin-bottom: 30px;
+}
+
+.auth-logo {
+  margin-bottom: 10px;
+}
+
+.auth-header h2 {
+  font-size: 28px;
+  color: var(--primary-teal);
+  margin-bottom: 4px;
+}
+
+.auth-header p {
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.auth-input {
+  width: 100%;
+  padding: 16px 20px;
+  border-radius: 20px;
+  border: 1px solid rgba(44, 74, 90, 0.1);
+  background: #FFF;
+  font-family: 'Outfit', sans-serif;
+  font-size: 15px;
+  color: var(--text-dark);
+  transition: all 0.3s ease;
+}
+
+.auth-input:focus {
+  outline: none;
+  border-color: var(--primary-teal);
+  box-shadow: var(--shadow-sm);
+}
+
+.auth-message {
+  font-size: 13px;
+  color: var(--accent-terracotta);
+  margin: 4px 0;
+}
+
+.auth-btn {
+  margin-top: 10px;
+  padding: 18px;
+}
+
+.google-btn {
+  background: white;
+  color: var(--text-dark);
+  border: 1px solid rgba(44, 74, 90, 0.15);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+.google-btn:hover {
+  background: #fafafa;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+}
+
+.auth-divider {
+  margin: 10px 0;
+  display: flex;
+  align-items: center;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid rgba(44, 74, 90, 0.1);
+}
+
+.auth-divider span {
+  padding: 0 10px;
+}
+
+.toggle-auth-btn {
+  margin-top: 24px;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.toggle-auth-btn:hover {
+  color: var(--primary-teal);
+}

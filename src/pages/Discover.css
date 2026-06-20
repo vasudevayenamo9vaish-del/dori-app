@@ -79,16 +79,24 @@
 }
 
 .card-name {
-  font-size: 20px;
-  color: var(--text-dark);
+  font-size: 22px;
+  color: var(--primary-teal);
+  margin-bottom: 2px;
+}
+
+.card-country {
+  font-size: 13px;
+  color: var(--accent-terracotta);
+  text-transform: uppercase;
+  letter-spacing: 1px;
   margin-bottom: 8px;
 }
 
 .card-bio {
-  font-size: 14px;
+  font-size: 15px;
   color: var(--text-muted);
-  line-height: 1.5;
-  margin-bottom: 24px;
+  line-height: 1.4;
+  margin-bottom: 20px;
 }
 
 .connect-gently-btn {

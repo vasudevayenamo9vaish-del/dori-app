@@ -5,7 +5,10 @@ import Discover from './pages/Discover';
 import Chats from './pages/Chats';
 import Weather from './pages/Weather';
 import BottomNav from './components/BottomNav';
-import { AnimatePresence } from 'framer-motion';
+import Auth from './components/Auth';
+import Onboarding from './components/Onboarding';
+import { useAuth } from './contexts/AuthContext';
+import ThreadIcon from './components/ThreadIcon';
 
 // A simple layout wrapper to show bottom nav
 const Layout = ({ children }) => {
@@ -21,6 +24,24 @@ const Layout = ({ children }) => {
 };
 
 const App = () => {
+  const { user, profile, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-cream)' }}>
+        <ThreadIcon size={40} className="loading-spinner" />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <Auth />;
+  }
+
+  if (!profile) {
+    return <Onboarding />;
+  }
+
   return (
     <Router>
       <Layout>
