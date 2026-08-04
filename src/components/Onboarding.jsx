@@ -21,6 +21,7 @@ const Onboarding = () => {
   const [firstName, setFirstName] = useState('');
   const [dob, setDob] = useState('');
   const [country, setCountry] = useState('');
+  const [gender, setGender] = useState('');
   const [bio, setBio] = useState('');
   const [error, setError] = useState('');
 
@@ -37,8 +38,8 @@ const Onboarding = () => {
 
   const handleSaveProfile = async (e) => {
     e.preventDefault();
-    if (!firstName || !dob || !country) {
-      setError("Please fill out required fields.");
+    if (!firstName || !dob || !country || !gender) {
+      setError("Please fill out all required fields.");
       return;
     }
 
@@ -55,6 +56,7 @@ const Onboarding = () => {
           age: age,
           dob: dob,
           country: country,
+          gender: gender,
           bio: bio,
           // Placeholder for optional photo later
           avatar_url: `https://api.dicebear.com/7.x/notionists/svg?seed=${firstName}&backgroundColor=F8F4ED`
@@ -111,6 +113,19 @@ const Onboarding = () => {
               className="auth-input"
             />
           </div>
+
+          <select 
+            value={gender} 
+            onChange={(e) => setGender(e.target.value)} 
+            required 
+            className="auth-input"
+          >
+            <option value="" disabled>Gender *</option>
+            <option value="Female">Female</option>
+            <option value="Male">Male</option>
+            <option value="Non-binary">Non-binary</option>
+            <option value="Prefer not to say">Prefer not to say</option>
+          </select>
 
           <select 
             value={country} 

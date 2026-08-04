@@ -27,7 +27,7 @@ const INTENTIONS = [
 
 const Home = () => {
   const navigate = useNavigate();
-  const { user, fetchProfile } = useAuth();
+  const { user, profile, fetchProfile } = useAuth();
   
   const [step, setStep] = useState(1);
   const [selectedMood, setSelectedMood] = useState('');
@@ -68,6 +68,18 @@ const Home = () => {
 
   return (
     <div className="screen-container home-screen">
+      <div className="home-header">
+        <button className="profile-btn" onClick={() => navigate('/profile')}>
+          <div className="avatar-mini">
+            {profile?.avatar_url ? (
+              <img src={profile.avatar_url} alt="Profile" />
+            ) : (
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-user"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            )}
+          </div>
+        </button>
+      </div>
+
       <ThreadBackground />
       
       <AnimatePresence mode="wait">

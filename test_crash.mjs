@@ -1,24 +1,20 @@
-import express from 'express';
 import puppeteer from 'puppeteer';
 
-const app = express();
-app.use(express.static('dist'));
-
-const server = app.listen(5000, '127.0.0.1', async () => {
-  try {
-    const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox'] });
-    const page = await browser.newPage();
-    
-    await page.goto('http://127.0.0.1:5000', { waitUntil: 'networkidle0' });
-    
-    const rootHTML = await page.evaluate(() => document.getElementById('root')?.innerHTML);
-    console.log("ROOT HTML CONTENT:\n", rootHTML);
-    
-    await browser.close();
-  } catch (err) {
-    console.error(err);
-  } finally {
-    server.close();
-    process.exit(0);
-  }
-});
+(async () => {
+  const browser = await puppeteer.launch({ args: ['--no-sandbox'] });
+  const page = await browser.newPage();
+  
+  page.on('console', msg => console.log('PAGE LOG:', msg.text()));
+  page.on('pageerror', err => console.log('PAGE ERROR:', err.toString()));
+  
+  await page.goto('https://velvety-malasada-b11d99.netlify.app', { waitUntil: 'networkidle0' });
+  
+  await page.screenshot({ path: 'netlify_screenshot.png' });
+  console.log("Screenshot saved to netlify_screenshot.png");
+  
+  const html = await page.content();
+  console.log("HTML length:", html.length);
+  console.log("HTML content:", html);
+  
+  await browser.close();
+})();

@@ -62,7 +62,7 @@ const Weather = () => {
     };
   }, []);
 
-  const fetchCheckIns = async () => {
+  async function fetchCheckIns() {
     try {
       const { data, error } = await supabase
         .from('weather_check_ins')

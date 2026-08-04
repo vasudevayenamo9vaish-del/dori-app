@@ -43,11 +43,11 @@ const Chats = () => {
     }
   }, [activeChat]);
 
-  const scrollToBottom = () => {
+  function scrollToBottom() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
+  }
 
-  const fetchMatches = async () => {
+  async function fetchMatches() {
     try {
       const { data, error } = await supabase
         .from('matches')
@@ -83,7 +83,7 @@ const Chats = () => {
     fetchMatches();
   };
 
-  const fetchMessages = async (matchId) => {
+  async function fetchMessages(matchId) {
     const { data, error } = await supabase
       .from('messages')
       .select('*')
@@ -106,7 +106,22 @@ const Chats = () => {
     };
 
     setInputText('');
-    await supabase.from('messages').insert([newMsg]);
+    
+    const { data, error } = await supabase.from('messages').insert([newMsg]).select();
+    
+    if (error) {
+      console.error("Error sending message:", error);
+      return;
+    }
+
+    setMessages(prev => {
+      // Prevent duplicate if Realtime event already added it
+      if (prev.find(m => m.id === data[0].id)) return prev;
+      return [...prev, data[0]];
+    });
+    
+    // Small delay to ensure DOM is updated before scrolling
+    setTimeout(scrollToBottom, 100);
   };
 
   if (!activeChat) {
@@ -157,6 +172,7 @@ const Chats = () => {
 
   return (
     <div className="chat-container">
+      <style>{`.bottom-nav { display: none !important; }`}</style>
       {/* Header */}
       <div className="chat-header">
         <button className="back-btn" onClick={() => setActiveChat(null)}><ArrowLeft size={20} /></button>

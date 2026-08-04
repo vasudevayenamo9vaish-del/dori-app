@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, SlidersHorizontal, X } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
 import ThreadIcon from '../components/ThreadIcon';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import './Discover.css';
+
+const COUNTRIES = [
+  "Worldwide", "India", "USA", "Europe", "UK", "Australia", "Southeast Asia"
+];
 
 const Discover = () => {
   const [profiles, setProfiles] = useState([]);
@@ -14,11 +18,19 @@ const Discover = () => {
   const selectedMood = location.state?.mood;
   const { user } = useAuth();
 
+  // Filters State
+  const [showFilters, setShowFilters] = useState(false);
+  const [filterGender, setFilterGender] = useState('Any');
+  const [filterMinAge, setFilterMinAge] = useState(18);
+  const [filterMaxAge, setFilterMaxAge] = useState(100);
+  const [filterRegion, setFilterRegion] = useState('Any');
+
   useEffect(() => {
     fetchProfiles();
-  }, []);
+  }, [filterGender, filterMinAge, filterMaxAge, filterRegion]);
 
-  const fetchProfiles = async () => {
+  async function fetchProfiles() {
+    setLoading(true);
     try {
       // Fetch all profiles except current user
       let query = supabase
@@ -26,10 +38,13 @@ const Discover = () => {
         .select('*')
         .neq('id', user.id);
         
-      if (selectedMood) {
-        // Optional: filter by mood, but for MVP we just prioritize or show all
-        // query = query.eq('current_mood', selectedMood);
+      if (filterGender !== 'Any') {
+        query = query.eq('gender', filterGender);
       }
+      if (filterRegion !== 'Any') {
+        query = query.eq('country', filterRegion);
+      }
+      query = query.gte('age', filterMinAge).lte('age', filterMaxAge);
 
       const { data, error } = await query;
       
@@ -65,10 +80,20 @@ const Discover = () => {
     }
   };
 
+  const applyFilters = () => {
+    setShowFilters(false);
+    // fetchProfiles is triggered by useEffect dependencies
+  };
+
   return (
     <div className="screen-container discover-screen">
       <div className="discover-header">
-        <h2>Discover Connections</h2>
+        <div className="discover-header-top">
+          <h2>Discover Connections</h2>
+          <button className="filter-btn" onClick={() => setShowFilters(true)}>
+            <SlidersHorizontal size={20} />
+          </button>
+        </div>
         {selectedMood ? (
           <p className="filtered-mood">Matching you based on: <span>"{selectedMood}"</span></p>
         ) : (
@@ -105,7 +130,9 @@ const Discover = () => {
                   
                   <div className="card-info">
                     <h3 className="card-name">{profile.first_name}, {profile.age}</h3>
-                    {profile.country && <p className="card-country">{profile.country}</p>}
+                    <p className="card-demographics">
+                      {profile.gender && `${profile.gender} • `}{profile.country && profile.country}
+                    </p>
                     <p className="card-bio">{profile.bio}</p>
                     
                     <button 
@@ -125,12 +152,97 @@ const Discover = () => {
                 animate={{ opacity: 1 }}
               >
                 <p>You've seen all connections for now.</p>
-                <span className="rest-message">Rest your mind.</span>
+                <span className="rest-message">Try expanding your filters.</span>
               </motion.div>
             )}
           </AnimatePresence>
         )}
       </div>
+
+      {/* Filters Modal */}
+      <AnimatePresence>
+        {showFilters && (
+          <motion.div 
+            className="filter-modal-backdrop"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.div 
+              className="filter-modal"
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+            >
+              <div className="filter-modal-header">
+                <h3>Filter Connections</h3>
+                <button onClick={() => setShowFilters(false)} className="close-filter-btn">
+                  <X size={24} />
+                </button>
+              </div>
+
+              <div className="filter-section">
+                <label>Gender Preference</label>
+                <div className="filter-options">
+                  {['Any', 'Female', 'Male', 'Non-binary'].map(g => (
+                    <button 
+                      key={g} 
+                      className={`filter-pill ${filterGender === g ? 'active' : ''}`}
+                      onClick={() => setFilterGender(g)}
+                    >
+                      {g}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="filter-section">
+                <label>Age Range</label>
+                <div className="age-inputs">
+                  <div className="age-input-group">
+                    <span>Min</span>
+                    <input 
+                      type="number" 
+                      value={filterMinAge} 
+                      onChange={(e) => setFilterMinAge(Number(e.target.value))}
+                      min={18} max={100}
+                    />
+                  </div>
+                  <div className="age-input-divider">-</div>
+                  <div className="age-input-group">
+                    <span>Max</span>
+                    <input 
+                      type="number" 
+                      value={filterMaxAge} 
+                      onChange={(e) => setFilterMaxAge(Number(e.target.value))}
+                      min={18} max={100}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="filter-section">
+                <label>Region</label>
+                <select 
+                  value={filterRegion} 
+                  onChange={(e) => setFilterRegion(e.target.value)}
+                  className="filter-select"
+                >
+                  <option value="Any">Any Region</option>
+                  {COUNTRIES.map(c => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
+                </select>
+              </div>
+
+              <button className="apply-filter-btn" onClick={applyFilters}>
+                Show Connections
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

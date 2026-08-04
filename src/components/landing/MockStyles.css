@@ -1,0 +1,327 @@
+/* MockStyles.css - Styles for the fully coded phone mockups */
+
+.mock-phone {
+  background: var(--bg-cream);
+  border-radius: 36px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.08), inset 0 0 0 8px #ffffff;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  /* Fixed aspect ratio close to an iPhone */
+  width: 100%;
+  aspect-ratio: 9 / 19.5;
+  font-family: 'Outfit', sans-serif;
+  color: var(--text-dark);
+}
+
+.mock-phone-content {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+  position: relative;
+  /* compensate for border inset */
+  margin: 8px;
+  border-radius: 28px;
+  background: var(--bg-cream);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Hide scrollbar for mockups */
+.mock-phone-content::-webkit-scrollbar {
+  display: none;
+}
+
+/* Common Mock UI Elements */
+.mock-header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  margin-bottom: 24px;
+  margin-top: 20px;
+}
+
+.mock-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.mock-title {
+  font-size: 1.25rem;
+  font-weight: 500;
+  color: var(--primary-teal);
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.mock-input {
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(0,0,0,0.1);
+  background: white;
+  margin-bottom: 12px;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.mock-btn-primary {
+  width: 100%;
+  padding: 12px;
+  border-radius: 20px;
+  background: var(--bg-cream);
+  border: 1px solid rgba(0,0,0,0.1);
+  color: var(--text-dark);
+  font-weight: 500;
+  margin-bottom: 12px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+}
+
+.mock-btn-primary.solid {
+  background: var(--accent-terracotta);
+  color: white;
+  border: none;
+}
+
+.mock-divider {
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin: 12px 0;
+  position: relative;
+}
+.mock-divider::before, .mock-divider::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 40%;
+  height: 1px;
+  background: rgba(0,0,0,0.05);
+}
+.mock-divider::before { left: 0; }
+.mock-divider::after { right: 0; }
+
+.mock-text-link {
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 10px;
+}
+.mock-text-link span {
+  font-weight: 600;
+  color: var(--text-dark);
+}
+
+/* Mood Pills */
+.mock-pill-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+}
+.mock-pill {
+  padding: 8px 16px;
+  background: white;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  border: 1px solid rgba(0,0,0,0.05);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+}
+.mock-pill.active {
+  background: var(--accent-terracotta);
+  color: white;
+  border: none;
+}
+
+/* Bottom Nav */
+.mock-bottom-nav {
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  right: 8px;
+  background: white;
+  border-radius: 20px;
+  padding: 12px 20px;
+  display: flex;
+  justify-content: space-between;
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.05);
+}
+.mock-nav-icon {
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  border: 1.5px solid var(--text-muted);
+}
+.mock-nav-icon.active {
+  border-color: var(--accent-terracotta);
+}
+
+/* Cards */
+.mock-card {
+  background: white;
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+  margin-bottom: 16px;
+}
+
+.mock-card-title {
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin-bottom: 2px;
+}
+.mock-card-subtitle {
+  font-size: 0.65rem;
+  color: var(--accent-terracotta);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 12px;
+}
+
+.mock-connect-btn {
+  width: 100%;
+  padding: 10px;
+  border-radius: 20px;
+  border: 1px solid var(--accent-terracotta);
+  color: var(--accent-terracotta);
+  background: transparent;
+  font-size: 0.8rem;
+  font-weight: 500;
+  margin-top: 8px;
+}
+
+.mock-connect-btn.solid {
+  background: var(--accent-terracotta);
+  color: white;
+}
+
+.mock-illustration {
+  width: 100%;
+  height: 120px;
+  background: rgba(0,0,0,0.02);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 16px 0;
+}
+
+.mock-warning-banner {
+  background: rgba(44, 74, 90, 0.05);
+  border-radius: 8px;
+  padding: 10px;
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+/* Chat Bubbles */
+.mock-chat-row {
+  display: flex;
+  margin-bottom: 12px;
+  align-items: flex-end;
+  gap: 6px;
+}
+.mock-chat-row.right {
+  justify-content: flex-end;
+}
+
+.mock-bubble {
+  padding: 10px 14px;
+  border-radius: 16px;
+  font-size: 0.75rem;
+  max-width: 80%;
+  line-height: 1.4;
+}
+.mock-bubble.left {
+  background: var(--primary-teal);
+  color: white;
+  border-bottom-left-radius: 4px;
+}
+.mock-bubble.right {
+  background: var(--accent-terracotta);
+  color: white;
+  border-bottom-right-radius: 4px;
+}
+
+.mock-chat-input {
+  position: absolute;
+  bottom: 60px; /* Above bottom nav */
+  left: 20px; right: 20px;
+  background: white;
+  border-radius: 20px;
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+}
+.mock-chat-input input {
+  flex: 1;
+  border: none;
+  font-size: 0.75rem;
+  outline: none;
+  background: transparent;
+}
+.mock-chat-send {
+  background: var(--primary-teal);
+  color: white;
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.6rem;
+}
+
+/* Map Screen */
+.mock-map-tabs {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  margin-bottom: 20px;
+  padding-bottom: 4px;
+}
+.mock-map-tabs::-webkit-scrollbar { display: none; }
+
+.mock-map-tab {
+  padding: 6px 12px;
+  font-size: 0.7rem;
+  border-radius: 16px;
+  background: white;
+  white-space: nowrap;
+}
+.mock-map-tab.active {
+  background: var(--primary-teal);
+  color: white;
+}
+
+.mock-map-graphic {
+  flex: 1;
+  background: url('/world-bg.png') no-repeat center center;
+  background-size: contain;
+  position: relative;
+  opacity: 0.5;
+  margin: 20px 0;
+}
+
+.mock-checkin-btn {
+  background: white;
+  color: var(--text-dark);
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 12px;
+  border-radius: 20px;
+  text-align: center;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+  margin-bottom: 60px;
+}

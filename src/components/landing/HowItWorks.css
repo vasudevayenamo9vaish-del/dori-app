@@ -1,0 +1,527 @@
+/* HowItWorks.css */
+
+.hdw-section {
+  padding: 6rem 5%;
+  background-color: var(--bg-cream, #fdfbf7);
+  overflow: hidden;
+  position: relative;
+  width: 100%;
+}
+
+.hdw-header {
+  text-align: center;
+  margin-bottom: 4rem;
+}
+
+.hdw-sub {
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--accent-terracotta, #D9776A);
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 12px;
+}
+
+.hdw-title {
+  font-size: 3.5rem;
+  color: var(--text-dark, #2D2A26);
+  margin-bottom: 1rem;
+  font-family: 'Georgia', serif;
+  font-weight: 500;
+}
+
+.hdw-title span {
+  color: var(--accent-terracotta, #D9776A);
+}
+
+.hdw-desc {
+  font-size: 1.2rem;
+  color: var(--text-muted, #7A7571);
+}
+
+.hdw-desc span {
+  color: var(--accent-terracotta, #D9776A);
+}
+
+.hdw-scroll-container {
+  width: 100%;
+  overflow-x: auto;
+  padding-bottom: 3rem;
+  -webkit-overflow-scrolling: touch;
+}
+
+.hdw-scroll-container::-webkit-scrollbar {
+  height: 6px;
+}
+.hdw-scroll-container::-webkit-scrollbar-track {
+  background: rgba(0,0,0,0.05);
+  border-radius: 3px;
+}
+.hdw-scroll-container::-webkit-scrollbar-thumb {
+  background: rgba(217, 119, 106, 0.3);
+  border-radius: 3px;
+}
+
+.hdw-track {
+  display: flex;
+  align-items: flex-start;
+  min-width: min-content;
+  padding: 0 2rem;
+}
+
+.hdw-column {
+  display: flex;
+  flex-direction: column;
+  width: 280px;
+  flex-shrink: 0;
+}
+
+.hdw-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  min-height: 120px;
+  margin-bottom: 30px;
+  text-align: left;
+}
+
+.hdw-step-num {
+  background: rgba(217, 119, 106, 0.2);
+  color: var(--accent-terracotta, #D9776A);
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 0.85rem;
+  flex-shrink: 0;
+}
+
+.hdw-text h4 {
+  font-size: 1.05rem;
+  color: var(--text-dark, #2D2A26);
+  margin: 0;
+  font-weight: 600;
+}
+
+.hdw-text p {
+  font-size: 0.85rem;
+  color: var(--text-muted, #7A7571);
+  line-height: 1.4;
+  margin: 0;
+}
+
+.hdw-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent-terracotta, #D9776A);
+  opacity: 0.5;
+  width: 60px;
+  flex-shrink: 0;
+  padding-top: 450px; /* Align with middle of the phone */
+  font-size: 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .hdw-arrow {
+    display: none;
+  }
+  .hdw-track {
+    gap: 30px;
+  }
+}
+
+/* Specific Phone Mockup Constraints */
+.hdw-phone {
+  width: 280px; 
+  height: 580px; 
+  background: #ffffff; 
+  border-radius: 32px; 
+  box-shadow: 0px 12px 40px rgba(0,0,0,0.08); 
+  border: 1px solid #f3f4f6; 
+  overflow: hidden; 
+  position: relative; 
+  margin: 0 auto; 
+  display: flex; 
+  flex-direction: column;
+  font-family: 'Outfit', sans-serif;
+  color: var(--text-dark, #2D2A26);
+  font-weight: 400;
+}
+
+/* Common Phone Elements */
+.mock-btn {
+  padding: 14px;
+  border-radius: 24px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  text-align: center;
+  cursor: pointer;
+  width: 100%;
+}
+.mock-btn.coral {
+  background: var(--accent-terracotta, #D9776A);
+  color: white;
+}
+.mock-btn.outline {
+  background: white;
+  border: 1px solid #ddd;
+  color: var(--text-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.mock-btn.outline-coral {
+  background: transparent;
+  border: 1px solid var(--accent-terracotta, #D9776A);
+  color: var(--accent-terracotta, #D9776A);
+}
+.mock-btn.outline-thin {
+  background: transparent;
+  border: 1px solid #ddd;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  margin: 10px 20px;
+  padding: 10px;
+  border-radius: 20px;
+}
+
+.mock-tabbar {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 16px 10px 24px;
+  background: white;
+  border-top: 1px solid #f0f0f0;
+  margin-top: auto;
+}
+.mock-tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  color: #ccc;
+  font-size: 0.65rem;
+}
+.mock-tab.active {
+  color: var(--accent-terracotta, #D9776A);
+}
+.mock-tab svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* Screen 1: Login */
+.mock-login {
+  padding: 60px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+}
+.mock-logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  font-size: 2rem;
+  font-weight: 500;
+  margin-bottom: 8px;
+  font-family: 'Georgia', serif;
+  font-style: italic;
+  color: var(--accent-terracotta);
+}
+.mock-tagline {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-bottom: 50px;
+}
+.mock-form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.mock-input {
+  width: 100%;
+  padding: 16px 20px;
+  background: #fcfcfc;
+  border: 1px solid #f0f0f0;
+  border-radius: 16px;
+  font-size: 0.9rem;
+  color: #aaa;
+  font-weight: 400;
+}
+.mock-divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 12px 0;
+}
+.mock-divider .line { flex: 1; height: 1px; background: #eee; }
+.mock-divider .or { font-size: 0.85rem; color: #aaa; }
+.google-icon { width: 18px; height: 18px; }
+.mock-signup-text {
+  font-size: 0.85rem;
+  color: #aaa;
+  margin-top: auto;
+}
+.mock-signup-text strong { color: var(--text-dark); }
+
+/* Screen 2: Feeling */
+.mock-feeling {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: #fdfdfd;
+}
+.mock-top-icon {
+  align-self: flex-end;
+  padding: 30px 20px 0;
+  color: #ccc;
+}
+.mock-h3 {
+  font-size: 1.4rem;
+  text-align: center;
+  margin: 10px 0 30px;
+  font-weight: 400;
+}
+.mock-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 0 16px;
+  justify-content: center;
+}
+.mock-pill {
+  padding: 10px 18px;
+  background: white;
+  border: 1px solid #eaeaea;
+  border-radius: 24px;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+}
+.mock-pill.active {
+  background: var(--accent-terracotta, #D9776A);
+  color: white;
+  border-color: var(--accent-terracotta, #D9776A);
+}
+
+/* Screen 3: Discover */
+.mock-discover {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: #fcfcfc;
+  padding-top: 30px;
+}
+.mock-user-card {
+  background: white;
+  margin: 0 16px 20px;
+  border-radius: 24px;
+  padding: 20px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.04);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border: 1px solid #f9f9f9;
+}
+.mock-user-header {
+  text-align: center;
+  margin-bottom: 16px;
+}
+.mock-user-header strong {
+  display: block;
+  font-size: 1rem;
+}
+.mock-user-header span {
+  font-size: 0.65rem;
+  color: var(--accent-terracotta);
+  letter-spacing: 1px;
+}
+.mock-user-tag {
+  font-size: 0.8rem;
+  background: #f5f5f5;
+  padding: 6px 14px;
+  border-radius: 16px;
+  margin-top: 16px;
+}
+.mock-user-avatar {
+  margin-top: 20px;
+}
+.mock-user-card.small {
+  padding: 16px;
+  opacity: 0.5;
+}
+
+/* Screen 4 & 5: Connect & Chat */
+.mock-connect, .mock-chat {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: white;
+}
+.mock-topbar {
+  display: flex;
+  align-items: center;
+  padding: 40px 16px 16px;
+  border-bottom: 1px solid #f0f0f0;
+}
+.mock-back {
+  font-size: 1.8rem;
+  color: #ccc;
+  margin-right: 14px;
+}
+.mock-top-user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.mock-avatar-small {
+  width: 36px;
+  height: 36px;
+  background: #eee;
+  border-radius: 50%;
+}
+.mock-top-info strong {
+  display: block;
+  font-size: 0.9rem;
+}
+.mock-status {
+  font-size: 0.75rem;
+  color: var(--accent-terracotta);
+}
+.mock-safety-banner {
+  background: #fcfcfc;
+  padding: 12px 16px;
+  font-size: 0.75rem;
+  color: #888;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  border-bottom: 1px solid #f0f0f0;
+}
+.msb-icon {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.mock-spacer {
+  flex: 1;
+}
+.mock-bottom-btn {
+  margin: 24px;
+  width: auto;
+}
+.mock-messages {
+  flex: 1;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.mock-msg {
+  padding: 12px 16px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  max-width: 80%;
+  line-height: 1.4;
+}
+.mock-msg.incoming {
+  background: #f5f5f5;
+  color: var(--text-dark);
+  align-self: flex-start;
+  border-bottom-left-radius: 4px;
+}
+.mock-msg.outgoing {
+  background: var(--accent-terracotta);
+  color: white;
+  align-self: flex-end;
+  border-bottom-right-radius: 4px;
+}
+.mock-input-area {
+  padding: 16px;
+  border-top: 1px solid #f0f0f0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.mock-chat-input {
+  flex: 1;
+  background: #f9f9f9;
+  padding: 12px 16px;
+  border-radius: 24px;
+  font-size: 0.85rem;
+  color: #aaa;
+}
+.mock-send-btn {
+  width: 40px;
+  height: 40px;
+  background: #444;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Screen 6: Weather */
+.mock-weather {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: white;
+  padding-top: 30px;
+}
+.mock-weather-sub {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  text-align: center;
+  margin-top: -10px;
+  margin-bottom: 24px;
+}
+.mock-weather-tabs {
+  display: flex;
+  background: #f5f5f5;
+  margin: 0 16px 24px;
+  border-radius: 20px;
+  padding: 4px;
+}
+.mock-wtab {
+  flex: 1;
+  text-align: center;
+  font-size: 0.75rem;
+  padding: 8px 0;
+  border-radius: 16px;
+  color: #888;
+}
+.mock-wtab.active {
+  background: #333;
+  color: white;
+}
+.mock-map {
+  flex: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 16px;
+}
+.mock-map-img {
+  width: 100%;
+  opacity: 0.4;
+  filter: grayscale(100%);
+}
+.mock-map-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--accent-terracotta);
+  border-radius: 50%;
+  position: absolute;
+  box-shadow: 0 0 0 6px rgba(217, 119, 106, 0.15);
+}
