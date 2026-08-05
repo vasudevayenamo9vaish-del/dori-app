@@ -44,10 +44,6 @@ const App = () => {
           <Route path="/login" element={<Auth />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
-      ) : !profile ? (
-        <Routes>
-          <Route path="*" element={<Onboarding />} />
-        </Routes>
       ) : (
         <Layout>
           <Routes>

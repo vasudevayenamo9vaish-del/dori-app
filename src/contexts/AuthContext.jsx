@@ -49,7 +49,33 @@ export const AuthProvider = ({ children }) => {
       if (error && error.code !== 'PGRST116') {
         console.error('Error fetching profile:', error);
       }
-      setProfile(data);
+      
+      if (!data) {
+        // Auto-create a profile to bypass Onboarding
+        const { data: newProfile, error: insertError } = await supabase
+          .from('profiles')
+          .insert([
+            {
+              id: userId,
+              first_name: 'Dori User',
+              age: 25,
+              dob: '2000-01-01',
+              country: 'Worldwide',
+              gender: 'Prefer not to say',
+              avatar_url: `https://api.dicebear.com/7.x/notionists/svg?seed=DoriUser&backgroundColor=F8F4ED`
+            }
+          ])
+          .select()
+          .single();
+          
+        if (!insertError && newProfile) {
+          setProfile(newProfile);
+        } else {
+          setProfile(null);
+        }
+      } else {
+        setProfile(data);
+      }
     } catch (err) {
       console.error(err);
     } finally {

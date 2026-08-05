@@ -11,8 +11,6 @@ import {
 import './Landing.css';
 
 const Landing = () => {
-  const [showAuth, setShowAuth] = useState(false);
-
   useEffect(() => {
     document.getElementById('root').classList.add('landing-root-override');
     document.body.classList.add('landing-body-override');
@@ -32,7 +30,7 @@ const Landing = () => {
             <span style={{ color: 'var(--text-dark)', fontWeight: 600, fontSize: '1.2rem', letterSpacing: '-0.5px' }}>Dori</span>
           </div>
         </div>
-        <button className="nav-login-btn" onClick={() => setShowAuth(true)}>Log In</button>
+        <button className="nav-login-btn" onClick={() => window.location.href = '/login'}>Log In</button>
       </nav>
 
       {/* Hero Section */}
@@ -193,33 +191,11 @@ const Landing = () => {
           }}>
              <Play size={16} fill="white" /> Watch Demo
           </button>
-          <button className="hero-cta outline" onClick={() => setShowAuth(true)}>
+          <button className="hero-cta outline" onClick={() => window.location.href = '/login'}>
             Explore Dori
           </button>
         </div>
       </section>
-
-      {/* Auth Modal Overlay */}
-      <AnimatePresence>
-        {showAuth && (
-          <motion.div 
-            className="auth-modal-overlay"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={(e) => {
-              if (e.target.className === 'auth-modal-overlay') setShowAuth(false);
-            }}
-          >
-            <button className="auth-modal-close" onClick={() => setShowAuth(false)}>
-              &times;
-            </button>
-            <div onClick={(e) => e.stopPropagation()}>
-              <Auth isEmbedded={true} />
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 };

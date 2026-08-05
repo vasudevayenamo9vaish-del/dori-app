@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { motion } from 'framer-motion';
-import { ArrowLeft, LogOut, User } from 'lucide-react';
+import { ArrowLeft, LogOut, User, Camera } from 'lucide-react';
 import './Profile.css';
 
 const COUNTRIES = [
@@ -20,7 +20,46 @@ const Profile = () => {
   const [country, setCountry] = useState(profile?.country || '');
   const [gender, setGender] = useState(profile?.gender || '');
   const [bio, setBio] = useState(profile?.bio || '');
+  const [avatarUrl, setAvatarUrl] = useState(profile?.avatar_url || '');
   const [message, setMessage] = useState('');
+
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const maxSize = 300;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > maxSize) {
+            height *= maxSize / width;
+            width = maxSize;
+          }
+        } else {
+          if (height > maxSize) {
+            width *= maxSize / height;
+            height = maxSize;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+        setAvatarUrl(dataUrl);
+      };
+      img.src = event.target.result;
+    };
+    reader.readAsDataURL(file);
+  };
 
   const calculateAge = (dobString) => {
     const today = new Date();
@@ -49,6 +88,7 @@ const Profile = () => {
           country: country,
           gender: gender,
           bio: bio,
+          avatar_url: avatarUrl,
         })
         .eq('id', user.id);
 
@@ -84,12 +124,29 @@ const Profile = () => {
         animate={{ opacity: 1, y: 0 }}
       >
         <div className="avatar-section">
-          <div className="profile-avatar">
-            {profile?.avatar_url ? (
-              <img src={profile.avatar_url} alt="Avatar" />
+          <div className="profile-avatar" style={{ position: 'relative' }}>
+            {avatarUrl ? (
+              <img src={avatarUrl} alt="Avatar" />
             ) : (
               <User size={40} color="var(--primary-teal)" />
             )}
+            <label className="avatar-upload-btn" style={{
+              position: 'absolute',
+              bottom: 0,
+              right: 0,
+              background: 'var(--primary-teal)',
+              width: '32px',
+              height: '32px',
+              borderRadius: '50%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              boxShadow: '0 2px 5px rgba(0,0,0,0.2)'
+            }}>
+              <Camera size={16} color="white" />
+              <input type="file" accept="image/*" onChange={handleImageUpload} style={{ display: 'none' }} />
+            </label>
           </div>
         </div>
 
