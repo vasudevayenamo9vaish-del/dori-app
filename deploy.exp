@@ -1,0 +1,15 @@
+#!/usr/bin/expect -f
+set timeout 60
+spawn npx surge ./dist dori-app-fixed-99.surge.sh
+
+expect {
+    "email:" {
+        send "dori.temp.test.999@gmail.com\r"
+        exp_continue
+    }
+    "password:" {
+        send "Password123!\r"
+        exp_continue
+    }
+    eof
+}
