@@ -289,6 +289,8 @@ body.landing-body-override {
   box-shadow: 0 10px 30px rgba(0,0,0,0.1);
   aspect-ratio: 9 / 16;
   background: black;
+  max-width: 400px;
+  margin: 0 auto;
 }
 
 .promo-video {
@@ -511,4 +513,32 @@ body.landing-body-override {
   align-items: center;
   justify-content: center;
   z-index: 1001;
+}
+
+/* Pre-Login Footer */
+.landing-footer {
+  padding: 2rem;
+  background-color: var(--bg-cream);
+  border-top: 1px solid rgba(0,0,0,0.05);
+  display: flex;
+  justify-content: center;
+}
+
+.landing-footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  justify-content: center;
+  max-width: 800px;
+}
+
+.footer-link {
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 0.85rem;
+  transition: color 0.2s ease;
+}
+
+.footer-link:hover {
+  color: var(--text-dark);
 }

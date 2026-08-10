@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, SlidersHorizontal, X } from 'lucide-react';
+import { Sparkles, SlidersHorizontal, X, Check } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
 import ThreadIcon from '../components/ThreadIcon';
 import { supabase } from '../lib/supabase';
@@ -17,6 +17,7 @@ const Discover = () => {
   const location = useLocation();
   const selectedMood = location.state?.mood;
   const { user } = useAuth();
+  const [toast, setToast] = useState(null);
 
   // Filters State
   const [showFilters, setShowFilters] = useState(false);
@@ -75,6 +76,8 @@ const Discover = () => {
       await supabase.from('matches').insert([
         { requester_id: user.id, receiver_id: id, status: 'pending' }
       ]);
+      setToast('Connection request sent!');
+      setTimeout(() => setToast(null), 3000);
     } catch (err) {
       console.error('Failed to send match request:', err);
     }
@@ -240,6 +243,20 @@ const Discover = () => {
                 Show Connections
               </button>
             </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {toast && (
+          <motion.div 
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 50 }}
+            className="dori-toast"
+          >
+            <Check size={16} />
+            {toast}
           </motion.div>
         )}
       </AnimatePresence>

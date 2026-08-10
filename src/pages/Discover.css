@@ -289,3 +289,21 @@
   font-weight: 600;
   margin-top: 10px;
 }
+
+.dori-toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: var(--accent-terracotta);
+  color: white;
+  padding: 12px 24px;
+  border-radius: 100px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+  font-size: 14px;
+  box-shadow: 0 4px 12px rgba(217, 119, 106, 0.4);
+  z-index: 1000;
+}

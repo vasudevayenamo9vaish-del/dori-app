@@ -112,7 +112,7 @@ const Landing = () => {
             <div className="floating-avatar a2"><img src="https://i.pravatar.cc/150?img=11" alt="user" /></div>
             <div className="floating-avatar a3"><img src="https://i.pravatar.cc/150?img=4" alt="user" /></div>
             <div className="floating-stats-pill">
-              <strong>100K+</strong> People around the world feeling a little less alone.
+              <strong>A growing community</strong> around the world feeling a little less alone.
             </div>
 
             <div className="hero-phone-container">
@@ -192,10 +192,20 @@ const Landing = () => {
              <Play size={16} fill="white" /> Watch Demo
           </button>
           <button className="hero-cta outline" onClick={() => window.location.href = '/login'}>
-            Explore Dori
+            Join the Community
           </button>
         </div>
       </section>
+
+      {/* Pre-Login Footer */}
+      <footer className="landing-footer">
+        <div className="landing-footer-links">
+          <a href="/privacy" className="footer-link">Privacy Policy</a>
+          <a href="/guidelines" className="footer-link">Community Guidelines</a>
+          <a href="/age-requirements" className="footer-link">Age Requirements</a>
+          <a href="/crisis-support" className="footer-link">Crisis Resources & Support</a>
+        </div>
+      </footer>
     </div>
   );
 };

@@ -10,6 +10,7 @@ const Chats = () => {
   const { user, profile } = useAuth();
   const [matches, setMatches] = useState([]);
   const [pendingRequests, setPendingRequests] = useState([]);
+  const [sentRequests, setSentRequests] = useState([]);
   const [activeChat, setActiveChat] = useState(null);
   const [messages, setMessages] = useState([]);
   const [inputText, setInputText] = useState('');
@@ -61,12 +62,14 @@ const Chats = () => {
       if (error) throw error;
 
       const pending = data.filter(m => m.status === 'pending' && m.receiver_id === user.id);
+      const sent = data.filter(m => m.status === 'pending' && m.requester_id === user.id);
       const accepted = data.filter(m => m.status === 'accepted').map(m => {
         const otherUser = m.requester_id === user.id ? m.receiver : m.requester;
         return { match_id: m.id, ...otherUser };
       });
 
       setPendingRequests(pending);
+      setSentRequests(sent);
       setMatches(accepted);
     } catch (err) {
       console.error(err);
@@ -148,12 +151,32 @@ const Chats = () => {
           </div>
         )}
 
-        <div className="accepted-section">
-          <h3>Your Threads</h3>
-          {matches.length === 0 ? (
-            <p className="empty-state">No threads yet. Visit Discover to connect.</p>
-          ) : (
-            matches.map(match => (
+        {sentRequests.length > 0 && (
+          <div className="pending-section" style={{ marginTop: '20px' }}>
+            <h3 style={{ color: 'var(--text-muted)' }}>Sent Requests</h3>
+            {sentRequests.map(req => (
+              <div key={req.id} className="match-item pending" style={{ opacity: 0.8 }}>
+                <img src={req.receiver.avatar_url} alt="avatar" />
+                <div className="match-info">
+                  <h4>{req.receiver.first_name}</h4>
+                  <span>Request pending...</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {matches.length === 0 && pendingRequests.length === 0 && sentRequests.length === 0 && (
+          <div className="empty-state">
+            <ThreadIcon size={48} color="var(--accent-terracotta)" />
+            <p>No threads yet. Head to Discover to meet someone new.</p>
+          </div>
+        )}
+
+        {matches.length > 0 && (
+          <div className="matches-list">
+            <h3>Your Threads</h3>
+            {matches.map(match => (
               <div key={match.match_id} className="match-item" onClick={() => setActiveChat(match)}>
                 <img src={match.avatar_url} alt="avatar" />
                 <div className="match-info">
