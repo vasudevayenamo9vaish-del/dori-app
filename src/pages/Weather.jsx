@@ -254,7 +254,7 @@ const Weather = () => {
                   boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
                 }}>
                   <p style={{ margin: 0, fontWeight: 'bold', fontSize: '14px', color: 'var(--text-dark)', fontFamily: '"Comic Sans MS", "Chalkboard SE", "Marker Felt", sans-serif', lineHeight: '1.4' }}>
-                    Share how you're feeling, whatever you want to share anonymously. No judgments. ✨
+                    What's your emotional forecast right now? 🌦️ Stormy, sunny, or a little foggy? Type your anonymous weather report right here! ☁️
                   </p>
                 </div>
               </div>
