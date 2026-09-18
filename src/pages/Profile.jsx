@@ -4,11 +4,9 @@ import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { motion } from 'framer-motion';
 import { ArrowLeft, LogOut, User, Camera } from 'lucide-react';
+import { COUNTRIES } from '../utils/countries';
 import './Profile.css';
 
-const COUNTRIES = [
-  "Worldwide", "India", "USA", "Europe", "UK", "Australia", "Southeast Asia"
-];
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -190,14 +188,14 @@ const Profile = () => {
           </div>
 
           <div className="form-group">
-            <label>Region</label>
+            <label>Country / Region</label>
             <select 
               value={country} 
               onChange={(e) => setCountry(e.target.value)} 
               required 
               className="profile-input"
             >
-              <option value="" disabled>Select Region</option>
+              <option value="" disabled>Select your country</option>
               {COUNTRIES.map(c => (
                 <option key={c} value={c}>{c}</option>
               ))}

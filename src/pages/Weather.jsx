@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { CloudRain, X, Heart, Wind, Globe2 } from 'lucide-react';
+import { CloudRain, X, Heart, Wind, Globe2, Share, Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
+import { COUNTRIES } from '../utils/countries';
 import './Weather.css';
 
-const REGIONS = ["Worldwide", "India", "USA", "Europe", "UK", "Australia", "Southeast Asia"];
 const MOOD_OPTIONS = [
   "Lonely", "Missing parental warmth", "Feeling neglected", "Overwhelmed", 
   "Feeling lost", "Need someone to listen", "Calm & here to support", 
@@ -45,14 +45,14 @@ const Weather = () => {
     const channel = supabase
       .channel('public:weather_check_ins')
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'weather_check_ins' }, (payload) => {
-        setCheckIns((current) => {
+        setCheckIns(prev => {
           const newItem = {
             ...payload.new,
-            top: `${Math.random() * 40 + 10}%`,
-            left: `${Math.random() * 50 + 15}%`,
-            delay: Math.random() * 2
+            top: `${Math.random() * 60 + 10}%`,
+            left: `${Math.random() * 80 + 10}%`,
+            delay: 0
           };
-          return [newItem, ...current].slice(0, 30);
+          return [newItem, ...prev];
         });
       })
       .subscribe();
@@ -148,19 +148,26 @@ const Weather = () => {
         </div>
 
         {/* Region Filter */}
-        <div className="region-filter-container">
-          <div className="region-scroll">
-            {REGIONS.map(region => (
-              <button 
-                key={region}
-                className={`region-pill ${activeRegion === region ? 'active' : ''}`}
-                onClick={() => setActiveRegion(region)}
-              >
-                {region === 'Worldwide' && <Globe2 size={12} style={{ marginRight: '4px' }}/>}
-                {region}
-              </button>
+        <div className="region-filter-container" style={{ padding: '0 20px', margin: '10px 0' }}>
+          <select 
+            value={activeRegion}
+            onChange={(e) => setActiveRegion(e.target.value)}
+            style={{ 
+              width: '100%', 
+              backgroundColor: 'rgba(255,255,255,0.9)', 
+              border: '1px solid rgba(0,0,0,0.1)', 
+              padding: '10px 15px', 
+              borderRadius: '20px',
+              fontFamily: 'inherit',
+              color: 'var(--text-dark)',
+              outline: 'none'
+            }}
+          >
+            <option value="Worldwide">🌐 Worldwide</option>
+            {COUNTRIES.map(c => (
+              <option key={c} value={c}>{c}</option>
             ))}
-          </div>
+          </select>
         </div>
 
         {/* Floating Check-ins Area (Takes up middle space) */}
