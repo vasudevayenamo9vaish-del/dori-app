@@ -184,9 +184,9 @@ const Chats = () => {
                   <span>{match.current_mood || 'Connected'}</span>
                 </div>
               </div>
-            ))
-          )}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     );
   }
