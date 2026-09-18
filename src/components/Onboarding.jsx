@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { supabase } from '../supabaseClient';
+import { supabase } from '../lib/supabase';
 import { Camera } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { COUNTRIES } from '../utils/countries';
@@ -7,13 +7,6 @@ import { motion } from 'framer-motion';
 import ThreadIcon from './ThreadIcon';
 import './Auth.css'; // Reuse auth styles
 
-  "India",
-  "USA",
-  "Europe",
-  "UK",
-  "Australia",
-  "Southeast Asia"
-];
 
 const Onboarding = () => {
   const { user, fetchProfile } = useAuth();
