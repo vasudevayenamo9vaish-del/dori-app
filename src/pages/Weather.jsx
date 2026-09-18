@@ -243,55 +243,35 @@ const Weather = () => {
                 <X size={24} />
               </button>
               
-              <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', marginBottom: '25px', gap: '15px' }}>
-                <img src={MascotImage} alt="Dori Mascot" style={{ width: '80px', height: '80px', objectFit: 'cover', borderRadius: '40px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }} />
-                <div style={{ 
-                  backgroundColor: '#fff3e0', 
-                  padding: '12px 18px', 
-                  borderRadius: '20px 20px 20px 0', 
-                  position: 'relative',
-                  flex: 1,
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
-                }}>
-                  <p style={{ margin: 0, fontWeight: 'bold', fontSize: '14px', color: 'var(--text-dark)', fontFamily: '"Comic Sans MS", "Chalkboard SE", "Marker Felt", sans-serif', lineHeight: '1.4' }}>
-                    What's your emotional forecast right now? 🌦️ Stormy, sunny, or a little foggy? Type your anonymous weather report right here! ☁️
+              <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'flex-start', marginBottom: '25px', gap: '15px', paddingRight: '20px' }}>
+                <div style={{ width: '60px', height: '60px', flexShrink: 0, backgroundColor: '#f6ebd3', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+                  <img src={MascotImage} alt="Dori Mascot" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                </div>
+                <div style={{ flex: 1, paddingTop: '5px' }}>
+                  <p style={{ margin: 0, fontSize: '18px', color: '#4a3f35', fontFamily: 'ui-serif, Georgia, serif', lineHeight: '1.4', fontWeight: '500' }}>
+                    What's the weather in your sky today? Call it, bless it, or just watch it roll in.
                   </p>
                 </div>
               </div>
               
               <textarea 
-                placeholder="I am feeling..."
+                className="weather-textarea"
+                placeholder="What's brewing..."
                 value={selectedMood}
                 onChange={(e) => setSelectedMood(e.target.value)}
                 maxLength={100}
-                style={{ 
-                  width: '100%', 
-                  minHeight: '120px', 
-                  marginBottom: '20px', 
-                  resize: 'none', 
-                  fontSize: '16px',
-                  padding: '15px',
-                  borderRadius: '15px',
-                  border: '2px solid rgba(0,0,0,0.1)',
-                  backgroundColor: '#f9f9f9',
-                  boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.05)',
-                  fontFamily: 'inherit'
-                }}
               />
-
+              
               <button 
-                className="action-btn share-btn" 
+                className="let-it-drift-btn" 
                 onClick={handleShareAnonymously}
                 disabled={!selectedMood.trim()}
                 style={{ 
                   opacity: selectedMood.trim() ? 1 : 0.5,
-                  transition: 'opacity 0.2s',
-                  width: '100%',
-                  marginTop: '10px'
+                  pointerEvents: selectedMood.trim() ? 'auto' : 'none'
                 }}
               >
-                <Wind size={18} />
-                Share anonymously in Weather
+                Let it drift
               </button>
 
               <AnimatePresence>
