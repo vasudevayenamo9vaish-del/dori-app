@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { COUNTRIES } from '../utils/countries';
+import MascotImage from '../assets/hero.png';
 import './Weather.css';
 
 const MOOD_OPTIONS = [
@@ -242,29 +243,48 @@ const Weather = () => {
                 <X size={24} />
               </button>
               
-              <h3 className="sheet-title">How are you feeling right now?</h3>
-              <p className="sheet-subtitle">Type your feelings anonymously or select a tag.</p>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', marginBottom: '20px' }}>
+                <img src={MascotImage} alt="Dori Mascot" style={{ width: '100px', marginBottom: '-10px', zIndex: 1, position: 'relative' }} />
+                <div style={{ backgroundColor: '#fff3e0', padding: '15px 20px', borderRadius: '20px', width: '100%', border: '2px dashed var(--accent-terracotta)', position: 'relative' }}>
+                  <h3 style={{ fontFamily: '"Comic Sans MS", "Chalkboard SE", "Marker Felt", sans-serif', color: 'var(--accent-terracotta)', fontSize: '20px', margin: '0 0 5px 0' }}>Think... how are you feeling?</h3>
+                  <p style={{ margin: 0, fontWeight: 'bold', fontSize: '14px', color: 'var(--text-dark)' }}>What do you want to share? Type in here anonymously! 👇</p>
+                </div>
+              </div>
               
               <textarea 
-                className="onboarding-input"
                 placeholder="I am feeling..."
                 value={selectedMood}
                 onChange={(e) => setSelectedMood(e.target.value)}
                 maxLength={100}
-                style={{ width: '100%', minHeight: '80px', marginBottom: '15px', resize: 'none' }}
+                style={{ 
+                  width: '100%', 
+                  minHeight: '120px', 
+                  marginBottom: '20px', 
+                  resize: 'none', 
+                  fontSize: '16px',
+                  padding: '15px',
+                  borderRadius: '15px',
+                  border: '2px solid rgba(0,0,0,0.1)',
+                  backgroundColor: '#f9f9f9',
+                  boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.05)',
+                  fontFamily: 'inherit'
+                }}
               />
 
-              <div className="mood-tags-container">
-                {MOOD_OPTIONS.map((mood) => (
-                  <button 
-                    key={mood}
-                    className={`mood-tag ${selectedMood === mood ? 'selected' : ''}`}
-                    onClick={() => setSelectedMood(mood)}
-                  >
-                    {mood}
-                  </button>
-                ))}
-              </div>
+              <button 
+                className="action-btn share-btn" 
+                onClick={handleShareAnonymously}
+                disabled={!selectedMood.trim()}
+                style={{ 
+                  opacity: selectedMood.trim() ? 1 : 0.5,
+                  transition: 'opacity 0.2s',
+                  width: '100%',
+                  marginTop: '10px'
+                }}
+              >
+                <Wind size={18} />
+                Share anonymously in Weather
+              </button>
 
               <AnimatePresence>
                 {selectedMood && (
@@ -274,11 +294,6 @@ const Weather = () => {
                     animate={{ opacity: 1, height: 'auto' }}
                     exit={{ opacity: 0, height: 0 }}
                   >
-                    <button className="action-btn share-btn" onClick={handleShareAnonymously}>
-                      <Wind size={18} />
-                      Share anonymously in Weather
-                    </button>
-                    
                     <button className="action-btn find-btn" onClick={handleFindMatch}>
                       <Heart size={18} />
                       Find someone who matches this
