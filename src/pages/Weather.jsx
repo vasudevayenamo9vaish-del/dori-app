@@ -243,8 +243,17 @@ const Weather = () => {
               </button>
               
               <h3 className="sheet-title">How are you feeling right now?</h3>
-              <p className="sheet-subtitle">Select a feeling to express yourself.</p>
+              <p className="sheet-subtitle">Type your feelings anonymously or select a tag.</p>
               
+              <textarea 
+                className="onboarding-input"
+                placeholder="I am feeling..."
+                value={selectedMood}
+                onChange={(e) => setSelectedMood(e.target.value)}
+                maxLength={100}
+                style={{ width: '100%', minHeight: '80px', marginBottom: '15px', resize: 'none' }}
+              />
+
               <div className="mood-tags-container">
                 {MOOD_OPTIONS.map((mood) => (
                   <button 
