@@ -200,7 +200,7 @@ const Weather = () => {
         {/* Bottom Area: Stats + Button */}
         <div className="weather-bottom-area">
           <AnimatePresence>
-            {activeRegion !== 'Worldwide' && topEmotion && (
+            {topEmotion && (
               <motion.div 
                 className="compact-stat-card"
                 initial={{ opacity: 0, y: 20 }}
