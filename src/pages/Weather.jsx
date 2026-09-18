@@ -243,11 +243,19 @@ const Weather = () => {
                 <X size={24} />
               </button>
               
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', marginBottom: '20px' }}>
-                <img src={MascotImage} alt="Dori Mascot" style={{ width: '100px', marginBottom: '-10px', zIndex: 1, position: 'relative' }} />
-                <div style={{ backgroundColor: '#fff3e0', padding: '15px 20px', borderRadius: '20px', width: '100%', border: '2px dashed var(--accent-terracotta)', position: 'relative' }}>
-                  <h3 style={{ fontFamily: '"Comic Sans MS", "Chalkboard SE", "Marker Felt", sans-serif', color: 'var(--accent-terracotta)', fontSize: '20px', margin: '0 0 5px 0' }}>Think... how are you feeling?</h3>
-                  <p style={{ margin: 0, fontWeight: 'bold', fontSize: '14px', color: 'var(--text-dark)' }}>What do you want to share? Type in here anonymously! 👇</p>
+              <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', marginBottom: '25px', gap: '15px' }}>
+                <img src={MascotImage} alt="Dori Mascot" style={{ width: '80px', height: '80px', objectFit: 'cover', borderRadius: '40px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }} />
+                <div style={{ 
+                  backgroundColor: '#fff3e0', 
+                  padding: '12px 18px', 
+                  borderRadius: '20px 20px 20px 0', 
+                  position: 'relative',
+                  flex: 1,
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
+                }}>
+                  <p style={{ margin: 0, fontWeight: 'bold', fontSize: '14px', color: 'var(--text-dark)', fontFamily: '"Comic Sans MS", "Chalkboard SE", "Marker Felt", sans-serif', lineHeight: '1.4' }}>
+                    Share how you're feeling, whatever you want to share anonymously. No judgments. ✨
+                  </p>
                 </div>
               </div>
               
