@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { COUNTRIES } from '../utils/countries';
-import MascotImage from '../assets/hero.png';
+import MascotImage from '../assets/mascot.png';
 import './Weather.css';
 
 const MOOD_OPTIONS = [
