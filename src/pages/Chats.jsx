@@ -88,6 +88,13 @@ const Chats = () => {
     fetchMatches();
   };
 
+  const handleWithdraw = async (matchId) => {
+    if (window.confirm("Are you sure you want to withdraw this request?")) {
+      await supabase.from('matches').delete().eq('id', matchId);
+      fetchMatches();
+    }
+  };
+
   async function fetchMessages(matchId) {
     const { data, error } = await supabase
       .from('messages')
@@ -213,6 +220,11 @@ const Chats = () => {
                 <div className="match-info">
                   <h4>{req.receiver.first_name}</h4>
                   <span>Request pending...</span>
+                </div>
+                <div className="action-btns">
+                  <button onClick={() => handleWithdraw(req.id)} className="decline-btn" style={{ width: 'auto', padding: '0 12px', fontSize: '0.8rem', gap: '4px' }}>
+                    <X size={14}/> Withdraw
+                  </button>
                 </div>
               </div>
             ))}

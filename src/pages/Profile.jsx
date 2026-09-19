@@ -20,7 +20,35 @@ const Profile = () => {
   const [bio, setBio] = useState(profile?.bio || '');
   const [avatarUrl, setAvatarUrl] = useState(profile?.avatar_url || '');
   const [message, setMessage] = useState('');
+  const [blockedUsers, setBlockedUsers] = useState([]);
 
+  React.useEffect(() => {
+    async function fetchBlockedUsers() {
+      if (profile?.blocked_users && profile.blocked_users.length > 0) {
+        const { data } = await supabase
+          .from('profiles')
+          .select('id, first_name')
+          .in('id', profile.blocked_users);
+        if (data) setBlockedUsers(data);
+      } else {
+        setBlockedUsers([]);
+      }
+    }
+    fetchBlockedUsers();
+  }, [profile?.blocked_users]);
+
+  const handleUnblock = async (blockedId) => {
+    if (!profile?.blocked_users) return;
+    const newBlocks = profile.blocked_users.filter(id => id !== blockedId);
+    
+    await supabase.from('profiles').update({ blocked_users: newBlocks }).eq('id', user.id);
+    
+    // Update local state so it disappears instantly
+    setBlockedUsers(prev => prev.filter(u => u.id !== blockedId));
+    // Fetch profile globally so the context knows about the update
+    fetchProfile();
+  };
+  
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -223,6 +251,20 @@ const Profile = () => {
             {loading ? 'Saving...' : 'Save Changes'}
           </button>
         </form>
+
+        {blockedUsers.length > 0 && (
+          <div className="blocked-users-section">
+            <h3>Blocked Users</h3>
+            <div className="blocked-users-list">
+              {blockedUsers.map(u => (
+                <div key={u.id} className="blocked-user-item">
+                  <span>{u.first_name}</span>
+                  <button onClick={() => handleUnblock(u.id)} className="unblock-btn">Unblock</button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         <button className="logout-btn" onClick={handleLogout}>
           <LogOut size={18} />
