@@ -6,8 +6,7 @@ const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYm
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 async function check() {
-  const { data, error } = await supabase.from('profiles').select('id, device_token').not('device_token', 'is', null);
-  console.log("Tokens found:", data);
+  const { data, error } = await supabase.from('profiles').select('blocked_users').limit(1);
   console.log("Error:", error);
 }
 

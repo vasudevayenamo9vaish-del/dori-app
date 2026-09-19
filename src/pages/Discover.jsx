@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, SlidersHorizontal, X, Check } from 'lucide-react';
+import { Sparkles, SlidersHorizontal, X, Check, User } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
 import ThreadIcon from '../components/ThreadIcon';
 import { supabase } from '../lib/supabase';
@@ -51,14 +51,24 @@ const Discover = () => {
       
       if (error) throw error;
       
-      // Filter out profiles we already sent matches to
       const { data: matches } = await supabase
         .from('matches')
-        .select('receiver_id')
-        .eq('requester_id', user.id);
+        .select('receiver_id, requester_id')
+        .or(`requester_id.eq.${user.id},receiver_id.eq.${user.id}`);
         
-      const matchedIds = matches?.map(m => m.receiver_id) || [];
-      const availableProfiles = data.filter(p => !matchedIds.includes(p.id));
+      const matchedIds = matches?.flatMap(m => [m.receiver_id, m.requester_id]) || [];
+      
+      // Get blocked users
+      const { data: currentUserProfile } = await supabase
+        .from('profiles')
+        .select('blocked_users')
+        .eq('id', user.id)
+        .single();
+        
+      const blockedUsers = currentUserProfile?.blocked_users || [];
+      
+      // Filter out matched and blocked
+      let availableProfiles = data.filter(p => !matchedIds.includes(p.id) && !blockedUsers.includes(p.id));
       
       setProfiles(availableProfiles);
     } catch (err) {
@@ -128,7 +138,13 @@ const Discover = () => {
                   </div>
                   
                   <div className="card-image-wrapper">
-                    <img src={profile.avatar_url} alt={profile.first_name} className="card-image" />
+                    {profile.avatar_url ? (
+                      <img src={profile.avatar_url} alt={profile.first_name} className="card-image" />
+                    ) : (
+                      <div className="avatar-placeholder" style={{ width: '100%', height: '100%', background: '#ccc', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <User size={60} color="#FFF" />
+                      </div>
+                    )}
                   </div>
                   
                   <div className="card-info">

@@ -10,7 +10,11 @@ import {
 } from '../components/landing/MockScreens';
 import './Landing.css';
 
+import { useNavigate } from 'react-router-dom';
+
 const Landing = () => {
+  const navigate = useNavigate();
+  
   useEffect(() => {
     document.getElementById('root').classList.add('landing-root-override');
     document.body.classList.add('landing-body-override');
@@ -30,7 +34,7 @@ const Landing = () => {
             <span style={{ color: 'var(--text-dark)', fontWeight: 600, fontSize: '1.2rem', letterSpacing: '-0.5px' }}>Dori</span>
           </div>
         </div>
-        <button className="nav-login-btn" onClick={() => window.location.href = '/login'}>Log In</button>
+        <button className="nav-login-btn" onClick={() => navigate('/login')}>Log In</button>
       </nav>
 
       {/* Hero Section */}

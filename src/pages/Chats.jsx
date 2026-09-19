@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, ArrowLeft, Video, Check, X, ShieldAlert } from 'lucide-react';
+import { Send, ArrowLeft, Video, Check, X, ShieldAlert, User, MoreVertical, Ban } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import ThreadIcon from '../components/ThreadIcon';
@@ -16,6 +16,7 @@ const Chats = () => {
   const [messages, setMessages] = useState([]);
   const [inputText, setInputText] = useState('');
   const [safetyWarning, setSafetyWarning] = useState(false);
+  const [showBlockMenu, setShowBlockMenu] = useState(false);
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
@@ -100,6 +101,30 @@ const Chats = () => {
     }
   };
 
+  const handleBlock = async () => {
+    const blockedUserId = activeChat.id;
+    if (window.confirm("Are you sure you want to block this user? You will not see their messages or profile anymore.")) {
+      try {
+        const { data: profileData } = await supabase.from('profiles').select('blocked_users').eq('id', user.id).single();
+        const currentBlocks = profileData?.blocked_users || [];
+        
+        if (!currentBlocks.includes(blockedUserId)) {
+          const newBlocks = [...currentBlocks, blockedUserId];
+          await supabase.from('profiles').update({ blocked_users: newBlocks }).eq('id', user.id);
+        }
+        
+        // Unmatch them to remove from chat list
+        await supabase.from('matches').update({ status: 'declined' }).eq('id', activeChat.match_id);
+        
+        setActiveChat(null);
+        setShowBlockMenu(false);
+        fetchMatches();
+      } catch (err) {
+        console.error("Error blocking user", err);
+      }
+    }
+  };
+
   const handleSend = async () => {
     if (!inputText.trim()) return;
     
@@ -129,13 +154,17 @@ const Chats = () => {
 
     // TRIGGER PUSH NOTIFICATION VIA LOCAL SERVER
     try {
-      // 1. Find who the receiver is
-      const receiverId = activeChat.requester_id === user.id ? activeChat.receiver_id : activeChat.requester_id;
+      // The activeChat object represents the OTHER user's profile, so activeChat.id is their ID!
+      const receiverId = activeChat.id;
       // 2. Get their device token
       const { data: receiver } = await supabase.from('profiles').select('device_token').eq('id', receiverId).single();
       
       if (receiver && receiver.device_token) {
-        const apiUrl = Capacitor.isNativePlatform() ? 'http://10.0.2.2:3001/notify' : 'http://localhost:3001/notify';
+        // Use Vercel API in production, local Node.js server in development
+        const apiUrl = import.meta.env.PROD 
+          ? '/api/notify'
+          : (Capacitor.isNativePlatform() ? 'http://10.0.2.2:3001/notify' : 'http://localhost:3001/notify');
+          
         await fetch(apiUrl, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -202,7 +231,11 @@ const Chats = () => {
             <h3>Your Threads</h3>
             {matches.map(match => (
               <div key={match.match_id} className="match-item" onClick={() => setActiveChat(match)}>
-                <img src={match.avatar_url} alt="avatar" />
+                {match.avatar_url ? (
+                  <img src={match.avatar_url} alt="avatar" />
+                ) : (
+                  <div className="avatar-placeholder"><User size={24} color="#FFF" /></div>
+                )}
                 <div className="match-info">
                   <h4>{match.first_name}</h4>
                   <span>{match.current_mood || 'Connected'}</span>
@@ -224,15 +257,33 @@ const Chats = () => {
       <div className="chat-header">
         <button className="back-btn" onClick={() => setActiveChat(null)}><ArrowLeft size={20} /></button>
         <div className="chat-user-info">
-          <img src={activeChat.avatar_url} alt={activeChat.first_name} className="chat-avatar" />
+          {activeChat.avatar_url ? (
+            <img src={activeChat.avatar_url} alt={activeChat.first_name} className="chat-avatar" />
+          ) : (
+            <div className="avatar-placeholder" style={{ width: 40, height: 40, borderRadius: '50%', background: '#ccc', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <User size={20} color="#FFF" />
+            </div>
+          )}
           <div>
             <h3>{activeChat.first_name}</h3>
             <span className="status">{activeChat.current_mood}</span>
           </div>
         </div>
-        {canVideoCall && (
-          <button className="video-btn"><Video size={20} /></button>
-        )}
+        <div className="chat-actions" style={{ position: 'relative', display: 'flex', gap: '10px' }}>
+          {canVideoCall && (
+            <button className="video-btn"><Video size={20} /></button>
+          )}
+          <button className="video-btn" onClick={() => setShowBlockMenu(!showBlockMenu)}>
+            <MoreVertical size={20} />
+          </button>
+          {showBlockMenu && (
+            <div className="block-menu">
+              <button onClick={handleBlock} className="block-btn">
+                <Ban size={16} /> Block & Report
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Messages */}
