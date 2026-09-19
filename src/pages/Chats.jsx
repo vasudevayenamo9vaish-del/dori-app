@@ -125,6 +125,28 @@ const Chats = () => {
     
     // Small delay to ensure DOM is updated before scrolling
     setTimeout(scrollToBottom, 100);
+
+    // TRIGGER PUSH NOTIFICATION VIA LOCAL SERVER
+    try {
+      // 1. Find who the receiver is
+      const receiverId = activeChat.requester_id === user.id ? activeChat.receiver_id : activeChat.requester_id;
+      // 2. Get their device token
+      const { data: receiver } = await supabase.from('profiles').select('device_token').eq('id', receiverId).single();
+      
+      if (receiver && receiver.device_token) {
+        await fetch('http://10.0.2.2:3001/notify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            token: receiver.device_token,
+            title: `New message from ${profile?.first_name || 'someone'}`,
+            body: inputText.length > 50 ? inputText.substring(0, 50) + '...' : inputText
+          })
+        });
+      }
+    } catch (err) {
+      console.error("Push notification error:", err);
+    }
   };
 
   if (!activeChat) {

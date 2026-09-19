@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "389369592451",
+    "project_id": "mydori-5d8d3",
+    "storage_bucket": "mydori-5d8d3.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:389369592451:android:205e9a83d2eca37603b9b6",
+        "android_client_info": {
+          "package_name": "com.dori.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBIcY8rsKG3HVDBc9PM99OSQG8teaYi8Uo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
