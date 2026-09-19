@@ -4,6 +4,7 @@ import { Send, ArrowLeft, Video, Check, X, ShieldAlert } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import ThreadIcon from '../components/ThreadIcon';
+import { Capacitor } from '@capacitor/core';
 import './Chats.css';
 
 const Chats = () => {
@@ -134,7 +135,8 @@ const Chats = () => {
       const { data: receiver } = await supabase.from('profiles').select('device_token').eq('id', receiverId).single();
       
       if (receiver && receiver.device_token) {
-        await fetch('http://10.0.2.2:3001/notify', {
+        const apiUrl = Capacitor.isNativePlatform() ? 'http://10.0.2.2:3001/notify' : 'http://localhost:3001/notify';
+        await fetch(apiUrl, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
