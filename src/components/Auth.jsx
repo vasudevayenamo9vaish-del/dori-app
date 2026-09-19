@@ -9,6 +9,7 @@ const Auth = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLogin, setIsLogin] = useState(true);
+  const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [message, setMessage] = useState('');
 
   const handleAuth = async (e) => {
@@ -17,7 +18,13 @@ const Auth = () => {
     setMessage('');
     
     try {
-      if (isLogin) {
+      if (isForgotPassword) {
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: window.location.origin + '/reset-password',
+        });
+        if (error) throw error;
+        setMessage('Check your email for the password reset link.');
+      } else if (isLogin) {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
       } else {
@@ -31,6 +38,7 @@ const Auth = () => {
       setLoading(false);
     }
   };
+
   const handleGoogleLogin = async () => {
     setLoading(true);
     try {
@@ -58,7 +66,7 @@ const Auth = () => {
         <div className="auth-header">
           <ThreadIcon size={40} className="auth-logo" />
           <h2>Dori</h2>
-          <p>Emotional Thread Connections</p>
+          <p>{isForgotPassword ? 'Reset Password' : 'Emotional Thread Connections'}</p>
         </div>
 
         <form onSubmit={handleAuth} className="auth-form">
@@ -70,40 +78,66 @@ const Auth = () => {
             required
             className="auth-input"
           />
-          <input
-            type="password"
-            placeholder="Your password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            className="auth-input"
-          />
+          
+          {!isForgotPassword && (
+            <input
+              type="password"
+              placeholder="Your password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              className="auth-input"
+            />
+          )}
+
+          {isLogin && !isForgotPassword && (
+            <button 
+              type="button" 
+              className="forgot-password-link" 
+              onClick={() => { setIsForgotPassword(true); setMessage(''); }}
+            >
+              Forgot password?
+            </button>
+          )}
           
           {message && <p className="auth-message">{message}</p>}
           
           <button type="submit" disabled={loading} className="auth-btn connect-btn">
-            {loading ? 'Loading...' : (isLogin ? 'Sign In' : 'Create Account')}
+            {loading ? 'Loading...' : (isForgotPassword ? 'Send Reset Link' : (isLogin ? 'Sign In' : 'Create Account'))}
           </button>
         </form>
         
-        <div className="auth-divider">
-          <span>or</span>
-        </div>
+        {!isForgotPassword && (
+          <>
+            <div className="auth-divider">
+              <span>or</span>
+            </div>
 
-        <button 
-          type="button" 
-          disabled={loading} 
-          className="auth-btn google-btn"
-          onClick={handleGoogleLogin}
-        >
-          Continue with Google
-        </button>
+            <button 
+              type="button" 
+              disabled={loading} 
+              className="auth-btn google-btn"
+              onClick={handleGoogleLogin}
+            >
+              Continue with Google
+            </button>
+          </>
+        )}
 
         <button 
           className="toggle-auth-btn"
-          onClick={() => { setIsLogin(!isLogin); setMessage(''); }}
+          onClick={() => { 
+            if (isForgotPassword) {
+              setIsForgotPassword(false);
+            } else {
+              setIsLogin(!isLogin); 
+            }
+            setMessage(''); 
+          }}
         >
-          {isLogin ? "Don't have an account? Sign up" : "Already have an account? Sign in"}
+          {isForgotPassword 
+            ? "Back to login" 
+            : (isLogin ? "Don't have an account? Sign up" : "Already have an account? Sign in")}
         </button>
       </motion.div>
     </div>

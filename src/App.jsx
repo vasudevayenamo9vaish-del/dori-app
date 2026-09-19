@@ -14,10 +14,12 @@ import ThreadIcon from './components/ThreadIcon';
 import { usePushNotifications } from './hooks/usePushNotifications';
 import { useLocalNotifications } from './hooks/useLocalNotifications';
 
+import ResetPassword from './pages/ResetPassword';
+
 // A simple layout wrapper to show bottom nav
 const Layout = ({ children }) => {
   const location = useLocation();
-  const hideNav = location.pathname.includes('/chat/'); // Hide on individual chat screen
+  const hideNav = location.pathname.includes('/chat/') || location.pathname === '/reset-password'; // Hide on individual chat screen
   
   return (
     <>
@@ -46,6 +48,7 @@ const App = () => {
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Auth />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       ) : (
@@ -56,6 +59,7 @@ const App = () => {
             <Route path="/chats" element={<Chats />} />
             <Route path="/weather" element={<Weather />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </Layout>

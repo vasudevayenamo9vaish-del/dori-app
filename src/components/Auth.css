@@ -110,12 +110,33 @@
 }
 
 .toggle-auth-btn {
-  margin-top: 24px;
-  background: transparent;
+  background: none;
+  border: none;
   color: var(--text-muted);
-  font-size: 14px;
+  font-size: 0.9rem;
+  margin-top: 1rem;
+  cursor: pointer;
+  padding: 0.5rem;
 }
 
 .toggle-auth-btn:hover {
-  color: var(--primary-teal);
+  color: var(--primary-color);
+}
+
+.forgot-password-link {
+  background: none;
+  border: none;
+  color: var(--accent-terracotta);
+  font-size: 0.85rem;
+  text-align: right;
+  margin-top: -0.5rem;
+  margin-bottom: 0.5rem;
+  cursor: pointer;
+  padding: 0;
+  display: block;
+  width: 100%;
+}
+
+.forgot-password-link:hover {
+  text-decoration: underline;
 }

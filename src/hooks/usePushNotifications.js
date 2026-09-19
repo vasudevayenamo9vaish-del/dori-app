@@ -30,10 +30,22 @@ export const usePushNotifications = (user) => {
     const addListeners = async () => {
       await PushNotifications.addListener('registration', async (token) => {
         console.log('Push registration success, token: ' + token.value);
-        // Save the device token to Supabase so we can send notifications to this user!
-        await supabase.from('profiles').update({ 
-          device_token: token.value 
-        }).eq('id', user.id);
+        
+        // Fetch the LATEST user directly to avoid stale closures!
+        const { data: { user: currentUser } } = await supabase.auth.getUser();
+        
+        if (currentUser) {
+          const { error } = await supabase
+            .from('profiles')
+            .update({ device_token: token.value })
+            .eq('id', currentUser.id);
+
+          if (error) {
+            console.error('Supabase token update error:', error);
+          } else {
+            console.log('Successfully saved device_token to Supabase:', token.value);
+          }
+        }
       });
 
       await PushNotifications.addListener('registrationError', err => {
