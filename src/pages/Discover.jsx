@@ -99,25 +99,18 @@ const Discover = () => {
     setProfiles((prev) => prev.filter((p) => p.id !== id));
     
     try {
-      // First check if a declined/old match already exists between these two
-      const { data: existingMatch } = await supabase
+      // 1. Forcefully delete ANY existing rows between these two users (whether 1 row or 5 rows)
+      // This guarantees no "duplicate key" constraints or multiple-row conflicts.
+      await supabase
         .from('matches')
-        .select('id')
-        .or(`and(requester_id.eq.${user.id},receiver_id.eq.${id}),and(requester_id.eq.${id},receiver_id.eq.${user.id})`)
-        .maybeSingle();
-
-      if (existingMatch) {
-        // Delete the old broken match to avoid RLS update issues
-        await supabase
-          .from('matches')
-          .delete()
-          .eq('id', existingMatch.id);
-      }
+        .delete()
+        .or(`and(requester_id.eq.${user.id},receiver_id.eq.${id}),and(requester_id.eq.${id},receiver_id.eq.${user.id})`);
       
-      // Insert new match cleanly
+      // 2. Insert the fresh new match request cleanly
       const { error } = await supabase.from('matches').insert([
         { requester_id: user.id, receiver_id: id, status: 'pending' }
       ]);
+      
       if (error) throw error;
       setToast('Connection request sent!');
       setTimeout(() => setToast(null), 3000);
