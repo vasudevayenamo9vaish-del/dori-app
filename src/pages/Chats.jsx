@@ -190,7 +190,11 @@ const Chats = () => {
     
     // Show elegant mascot instead of confetti
     setShowAcceptMascot(true);
-    setTimeout(() => setShowAcceptMascot(false), 2500);
+    
+    // Wait for the animation to finish playing before wiping the UI
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    setShowAcceptMascot(false);
 
     await supabase.from('matches').update({ status: 'accepted' }).eq('id', matchId);
     fetchMatches();
@@ -632,7 +636,19 @@ const Chats = () => {
             }}
           >
             <img src={MascotHugImg} alt="Mascot Hug" style={{ width: '220px', height: 'auto', mixBlendMode: 'multiply', filter: 'drop-shadow(0px 10px 20px rgba(0,0,0,0.1))' }} />
-            <h2 style={{ fontFamily: 'var(--font-serif)', color: 'var(--primary-teal)', marginTop: '20px' }}>Sending Warmth...</h2>
+            <motion.h2 
+              animate={{ opacity: [0.6, 1, 0.6], textShadow: ["0 0 5px rgba(74, 124, 130, 0.2)", "0 0 15px rgba(74, 124, 130, 0.6)", "0 0 5px rgba(74, 124, 130, 0.2)"] }}
+              transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
+              style={{ 
+                fontFamily: 'var(--font-serif)', 
+                color: 'var(--primary-teal)', 
+                marginTop: '20px',
+                fontStyle: 'italic',
+                fontWeight: '400'
+              }}
+            >
+              Sending Warmth<span className="animated-dots"></span>
+            </motion.h2>
           </motion.div>
         )}
         {showAcceptMascot && (

@@ -395,3 +395,15 @@
 .message-bubble.them .msg-time {
   color: rgba(255, 255, 255, 0.6);
 }
+
+@keyframes blink-dots {
+  0% { content: ''; }
+  33% { content: '.'; }
+  66% { content: '..'; }
+  100% { content: '...'; }
+}
+
+.animated-dots::after {
+  content: '';
+  animation: blink-dots 1.5s infinite steps(1);
+}
