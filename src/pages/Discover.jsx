@@ -107,17 +107,18 @@ const Discover = () => {
         .maybeSingle();
 
       if (existingMatch) {
-        // Update the old match to pending, making sure we are marked as the requester now
+        // Delete the old broken match to avoid RLS update issues
         await supabase
           .from('matches')
-          .update({ status: 'pending', requester_id: user.id, receiver_id: id })
+          .delete()
           .eq('id', existingMatch.id);
-      } else {
-        // Insert new match if none exists
-        await supabase.from('matches').insert([
-          { requester_id: user.id, receiver_id: id, status: 'pending' }
-        ]);
       }
+      
+      // Insert new match cleanly
+      const { error } = await supabase.from('matches').insert([
+        { requester_id: user.id, receiver_id: id, status: 'pending' }
+      ]);
+      if (error) throw error;
       setToast('Connection request sent!');
       setTimeout(() => setToast(null), 3000);
     } catch (err) {
