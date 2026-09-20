@@ -39,16 +39,10 @@ const Discover = () => {
   async function fetchProfiles() {
     setLoading(true);
     try {
+      // Fetch ALL profiles except current user
       let query = supabase.from('profiles').select('*').neq('id', user.id);
-        
-      if (searchQuery.trim() !== '') {
-        query = query.ilike('first_name', `%${searchQuery.trim()}%`);
-      } else {
-        if (filterGender !== 'Any') query = query.eq('gender', filterGender);
-        if (filterRegion !== 'Any') query = query.eq('country', filterRegion);
-        query = query.gte('age', filterMinAge).lte('age', filterMaxAge);
-      }
 
+      // Do NOT filter in Supabase. We will do it in JavaScript to guarantee it works regardless of RLS or PostgREST quirks.
       const { data, error } = await query;
       if (error) throw error;
       
@@ -57,7 +51,6 @@ const Discover = () => {
         .select('receiver_id, requester_id, status')
         .or(`requester_id.eq.${user.id},receiver_id.eq.${user.id}`);
         
-      // Only hide pending or accepted matches. This allows unblocked users to reappear!
       const activeMatches = matches?.filter(m => m.status === 'pending' || m.status === 'accepted') || [];
       const matchedIds = activeMatches.flatMap(m => [m.receiver_id, m.requester_id]);
       
@@ -68,9 +61,23 @@ const Discover = () => {
       
       let availableProfiles = data.filter(p => !blockedUsers.includes(p.id));
       
-      // If not searching, hide active matches
-      if (searchQuery.trim() === '') {
+      // APPLY SEARCH FILTER IN JAVASCRIPT
+      if (searchQuery.trim() !== '') {
+        const lowerQuery = searchQuery.trim().toLowerCase();
+        availableProfiles = availableProfiles.filter(p => 
+          p.first_name && p.first_name.toLowerCase().includes(lowerQuery)
+        );
+      } else {
+        // APPLY NORMAL FILTERS
         availableProfiles = availableProfiles.filter(p => !matchedIds.includes(p.id));
+        
+        if (filterGender !== 'Any') {
+          availableProfiles = availableProfiles.filter(p => p.gender === filterGender);
+        }
+        if (filterRegion !== 'Any') {
+          availableProfiles = availableProfiles.filter(p => p.country === filterRegion);
+        }
+        availableProfiles = availableProfiles.filter(p => p.age >= filterMinAge && p.age <= filterMaxAge);
       }
       
       setProfiles(availableProfiles);
