@@ -8,6 +8,8 @@ import VideoCall from '../components/VideoCall';
 import { Capacitor } from '@capacitor/core';
 import { useBackButton } from '../hooks/useBackButton';
 import { useRingtone } from '../hooks/useRingtone';
+import { Haptics, ImpactStyle } from '@capacitor/haptics';
+import confetti from 'canvas-confetti';
 import './Chats.css';
 
 const Chats = () => {
@@ -165,6 +167,17 @@ const Chats = () => {
   };
 
   const handleAccept = async (matchId) => {
+    if (Capacitor.isNativePlatform()) {
+      await Haptics.impact({ style: ImpactStyle.Medium });
+    }
+    
+    confetti({
+      particleCount: 100,
+      spread: 70,
+      origin: { y: 0.6 },
+      colors: ['#E6A89B', '#4A7C82', '#F8F4ED']
+    });
+
     await supabase.from('matches').update({ status: 'accepted' }).eq('id', matchId);
     fetchMatches();
   };
@@ -231,6 +244,10 @@ const Chats = () => {
 
   const handleSend = async () => {
     if (!inputText.trim()) return;
+    
+    if (Capacitor.isNativePlatform()) {
+      await Haptics.impact({ style: ImpactStyle.Light });
+    }
     
     const newMsg = {
       match_id: activeChat.match_id,

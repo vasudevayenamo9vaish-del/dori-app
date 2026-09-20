@@ -5,6 +5,8 @@ import { useLocation } from 'react-router-dom';
 import ThreadIcon from '../components/ThreadIcon';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
+import { Haptics, ImpactStyle } from '@capacitor/haptics';
+import { Capacitor } from '@capacitor/core';
 import './Discover.css';
 
 const COUNTRIES = [
@@ -89,6 +91,10 @@ const Discover = () => {
   }
 
   const handleConnect = async (id) => {
+    if (Capacitor.isNativePlatform()) {
+      await Haptics.impact({ style: ImpactStyle.Light });
+    }
+    
     // Remove from UI immediately for snappy feel
     setProfiles((prev) => prev.filter((p) => p.id !== id));
     
