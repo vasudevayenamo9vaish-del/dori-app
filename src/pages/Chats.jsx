@@ -334,7 +334,9 @@ const Chats = () => {
         </div>
         <div className="chat-actions" style={{ position: 'relative', display: 'flex', gap: '10px' }}>
           {canVideoCall && (
-            <button className="video-btn"><Video size={20} /></button>
+            <button className="video-btn" onClick={() => alert("Video calling is coming soon! 🌿")}>
+              <Video size={20} />
+            </button>
           )}
           <button className="video-btn" onClick={() => setShowBlockMenu(!showBlockMenu)}>
             <MoreVertical size={20} />
