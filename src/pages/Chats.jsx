@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, ArrowLeft, Video, Check, X, ShieldAlert, User, MoreVertical, Ban } from 'lucide-react';
+import { Send, ArrowLeft, Video, Check, X, ShieldAlert, User, MoreVertical, Ban, RefreshCw } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import ThreadIcon from '../components/ThreadIcon';
@@ -17,7 +17,9 @@ const Chats = () => {
   const [inputText, setInputText] = useState('');
   const [safetyWarning, setSafetyWarning] = useState(false);
   const [showBlockMenu, setShowBlockMenu] = useState(false);
-  const messagesEndRef = useRef(null);
+  const [isTyping, setIsTyping] = useState(false);
+  const typingTimeoutRef = useRef(null);
+  const chatChannelRef = useRef(null);
 
   useEffect(() => {
     fetchMatches();
@@ -38,13 +40,44 @@ const Chats = () => {
           setMessages(prev => [...prev, payload.new]);
           scrollToBottom();
         })
+        .on('broadcast', { event: 'typing' }, (payload) => {
+          // If the broadcast is from the other user
+          if (payload.payload.userId !== user.id) {
+            setIsTyping(payload.payload.typing);
+          }
+        })
         .subscribe();
+
+      chatChannelRef.current = channel;
 
       return () => {
         supabase.removeChannel(channel);
+        chatChannelRef.current = null;
       };
     }
   }, [activeChat]);
+
+  const handleTyping = (e) => {
+    setInputText(e.target.value);
+    
+    if (chatChannelRef.current) {
+      chatChannelRef.current.send({
+        type: 'broadcast',
+        event: 'typing',
+        payload: { typing: true, userId: user.id }
+      });
+
+      if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+      
+      typingTimeoutRef.current = setTimeout(() => {
+        chatChannelRef.current?.send({
+          type: 'broadcast',
+          event: 'typing',
+          payload: { typing: false, userId: user.id }
+        });
+      }, 2000);
+    }
+  };
 
   function scrollToBottom() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -194,7 +227,20 @@ const Chats = () => {
   if (!activeChat) {
     return (
       <div className="screen-container match-list-screen">
-        <h2 className="screen-title">Connections</h2>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <h2 className="screen-title">Connections</h2>
+          <button 
+            onClick={async () => {
+              const btn = document.getElementById('chat-refresh-btn');
+              if (btn) btn.style.transform = 'rotate(180deg)';
+              await fetchMatches();
+              if (btn) btn.style.transform = 'rotate(0deg)';
+            }} 
+            style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--primary-teal)' }}
+          >
+            <RefreshCw id="chat-refresh-btn" size={20} style={{ transition: 'transform 0.3s ease' }} />
+          </button>
+        </div>
         
         {pendingRequests.length > 0 && (
           <div className="pending-section">
@@ -323,6 +369,17 @@ const Chats = () => {
             </motion.div>
           );
         })}
+        {isTyping && (
+          <motion.div 
+            className="message-bubble them typing-indicator"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            <div className="dot"></div>
+            <div className="dot"></div>
+            <div className="dot"></div>
+          </motion.div>
+        )}
         <div ref={messagesEndRef} />
       </div>
 
@@ -333,7 +390,7 @@ const Chats = () => {
             type="text" 
             placeholder="Type gently..." 
             value={inputText}
-            onChange={(e) => setInputText(e.target.value)}
+            onChange={handleTyping}
             onKeyDown={(e) => e.key === 'Enter' && handleSend()}
           />
           <button className="send-btn" onClick={handleSend}>

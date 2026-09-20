@@ -6,8 +6,8 @@ const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYm
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 async function check() {
-  const { data, error } = await supabase.from('profiles').select('blocked_users').limit(1);
-  console.log("Error:", error);
+  const { data, error } = await supabase.from('profiles').select('id, first_name, blocked_users').not('blocked_users', 'is', null);
+  console.log("Profiles with blocked users:", JSON.stringify(data, null, 2));
 }
 
 check();

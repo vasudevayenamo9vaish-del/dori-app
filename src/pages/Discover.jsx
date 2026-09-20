@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, SlidersHorizontal, X, Check, User } from 'lucide-react';
+import { Sparkles, SlidersHorizontal, X, Check, User, Search, RefreshCw } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
 import ThreadIcon from '../components/ThreadIcon';
 import { supabase } from '../lib/supabase';
@@ -26,49 +26,52 @@ const Discover = () => {
   const [filterMaxAge, setFilterMaxAge] = useState(100);
   const [filterRegion, setFilterRegion] = useState('Any');
 
+  const [searchQuery, setSearchQuery] = useState('');
+
   useEffect(() => {
-    fetchProfiles();
-  }, [filterGender, filterMinAge, filterMaxAge, filterRegion]);
+    // Debounce search
+    const timer = setTimeout(() => {
+      fetchProfiles();
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [filterGender, filterMinAge, filterMaxAge, filterRegion, searchQuery]);
 
   async function fetchProfiles() {
     setLoading(true);
     try {
-      // Fetch all profiles except current user
-      let query = supabase
-        .from('profiles')
-        .select('*')
-        .neq('id', user.id);
+      let query = supabase.from('profiles').select('*').neq('id', user.id);
         
-      if (filterGender !== 'Any') {
-        query = query.eq('gender', filterGender);
+      if (searchQuery.trim() !== '') {
+        query = query.ilike('first_name', `%${searchQuery.trim()}%`);
+      } else {
+        if (filterGender !== 'Any') query = query.eq('gender', filterGender);
+        if (filterRegion !== 'Any') query = query.eq('country', filterRegion);
+        query = query.gte('age', filterMinAge).lte('age', filterMaxAge);
       }
-      if (filterRegion !== 'Any') {
-        query = query.eq('country', filterRegion);
-      }
-      query = query.gte('age', filterMinAge).lte('age', filterMaxAge);
 
       const { data, error } = await query;
-      
       if (error) throw error;
       
       const { data: matches } = await supabase
         .from('matches')
-        .select('receiver_id, requester_id')
+        .select('receiver_id, requester_id, status')
         .or(`requester_id.eq.${user.id},receiver_id.eq.${user.id}`);
         
-      const matchedIds = matches?.flatMap(m => [m.receiver_id, m.requester_id]) || [];
+      // Only hide pending or accepted matches. This allows unblocked users to reappear!
+      const activeMatches = matches?.filter(m => m.status === 'pending' || m.status === 'accepted') || [];
+      const matchedIds = activeMatches.flatMap(m => [m.receiver_id, m.requester_id]);
       
-      // Get blocked users
       const { data: currentUserProfile } = await supabase
-        .from('profiles')
-        .select('blocked_users')
-        .eq('id', user.id)
-        .single();
+        .from('profiles').select('blocked_users').eq('id', user.id).single();
         
       const blockedUsers = currentUserProfile?.blocked_users || [];
       
-      // Filter out matched and blocked
-      let availableProfiles = data.filter(p => !matchedIds.includes(p.id) && !blockedUsers.includes(p.id));
+      let availableProfiles = data.filter(p => !blockedUsers.includes(p.id));
+      
+      // If not searching, hide active matches
+      if (searchQuery.trim() === '') {
+        availableProfiles = availableProfiles.filter(p => !matchedIds.includes(p.id));
+      }
       
       setProfiles(availableProfiles);
     } catch (err) {
@@ -76,7 +79,7 @@ const Discover = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }
 
   const handleConnect = async (id) => {
     // Remove from UI immediately for snappy feel
@@ -103,14 +106,39 @@ const Discover = () => {
       <div className="discover-header">
         <div className="discover-header-top">
           <h2>Discover Connections</h2>
-          <button className="filter-btn" onClick={() => setShowFilters(true)}>
-            <SlidersHorizontal size={20} />
-          </button>
+          <div style={{ display: 'flex', gap: '12px' }}>
+            <button 
+              onClick={async () => {
+                const btn = document.getElementById('discover-refresh-btn');
+                if (btn) btn.style.transform = 'rotate(180deg)';
+                await fetchProfiles();
+                if (btn) btn.style.transform = 'rotate(0deg)';
+              }} 
+              style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--primary-teal)' }}
+            >
+              <RefreshCw id="discover-refresh-btn" size={20} style={{ transition: 'transform 0.3s ease' }} />
+            </button>
+            <button className="filter-btn" onClick={() => setShowFilters(true)}>
+              <SlidersHorizontal size={20} />
+            </button>
+          </div>
         </div>
-        {selectedMood ? (
-          <p className="filtered-mood">Matching you based on: <span>"{selectedMood}"</span></p>
-        ) : (
-          <p>People near your emotional frequency.</p>
+        
+        <div className="search-bar" style={{ display: 'flex', alignItems: 'center', background: 'white', borderRadius: '8px', padding: '8px 12px', marginTop: '10px', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
+          <Search size={16} color="var(--text-muted)" style={{ marginRight: '8px' }} />
+          <input 
+            type="text" 
+            placeholder="Search by name..." 
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            style={{ border: 'none', outline: 'none', background: 'transparent', flex: 1, fontSize: '0.95rem' }}
+          />
+        </div>
+
+        {selectedMood && !searchQuery ? (
+          <p className="filtered-mood" style={{ marginTop: '10px' }}>Matching you based on: <span>"{selectedMood}"</span></p>
+        ) : !searchQuery && (
+          <p style={{ marginTop: '10px' }}>People near your emotional frequency.</p>
         )}
       </div>
 
