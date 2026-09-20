@@ -20,6 +20,7 @@ const Chats = () => {
   const [isTyping, setIsTyping] = useState(false);
   const typingTimeoutRef = useRef(null);
   const chatChannelRef = useRef(null);
+  const messagesEndRef = useRef(null);
 
   useEffect(() => {
     fetchMatches();
@@ -402,12 +403,4 @@ const Chats = () => {
   );
 };
 
-import ErrorBoundary from '../components/ErrorBoundary';
-
-export default function ChatsWithErrorBoundary(props) {
-  return (
-    <ErrorBoundary>
-      <Chats {...props} />
-    </ErrorBoundary>
-  );
-}
+export default Chats;
