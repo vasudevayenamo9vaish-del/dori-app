@@ -42,8 +42,8 @@ const Chats = () => {
         })
         .on('broadcast', { event: 'typing' }, (payload) => {
           // If the broadcast is from the other user
-          if (payload.payload.userId !== user.id) {
-            setIsTyping(payload.payload.typing);
+          if (payload?.payload?.userId !== user?.id) {
+            setIsTyping(payload?.payload?.typing || false);
           }
         })
         .subscribe();
@@ -140,7 +140,7 @@ const Chats = () => {
       .order('created_at', { ascending: true });
     
     if (!error) {
-      setMessages(data);
+      setMessages(data || []);
       scrollToBottom();
     }
   };
@@ -310,7 +310,7 @@ const Chats = () => {
     );
   }
 
-  const canVideoCall = messages.length >= 5;
+  const canVideoCall = (messages || []).length >= 5;
 
   return (
     <div className="chat-container">
@@ -356,7 +356,7 @@ const Chats = () => {
         </div>
         
         <div className="chat-thread-line"></div>
-        {messages.map((msg) => {
+        {(messages || []).map((msg) => {
           const isMe = msg.sender_id === user.id;
           return (
             <motion.div 
