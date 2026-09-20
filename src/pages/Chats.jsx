@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Send, ArrowLeft, Video, Check, X, ShieldAlert, User, MoreVertical, Ban, RefreshCw, HandHeart, BellOff, BellRing, UserMinus } from 'lucide-react';
 import { supabase } from '../lib/supabase';
@@ -654,7 +655,7 @@ const Chats = () => {
         )}
       </AnimatePresence>
 
-      {showAcceptMascot && (
+      {showAcceptMascot && createPortal(
         <div 
           className="accept-mascot-overlay"
           style={{
@@ -672,7 +673,8 @@ const Chats = () => {
         >
           <img src={MascotImg} alt="Connection Accepted" style={{ width: '180px', height: 'auto', filter: 'drop-shadow(0px 10px 20px rgba(0,0,0,0.05))' }} />
           <h2 style={{ fontFamily: 'var(--font-serif)', color: 'var(--primary-teal)', marginTop: '24px', fontWeight: 'normal' }}>Thread Connected.</h2>
-        </div>
+        </div>,
+        document.body
       )}
 </div>
   );
