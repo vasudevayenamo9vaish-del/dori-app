@@ -407,3 +407,14 @@
   content: '';
   animation: blink-dots 1.5s infinite steps(1);
 }
+
+@keyframes fade-in-scale {
+  0% { opacity: 0; transform: scale(0.9); }
+  20% { opacity: 1; transform: scale(1); }
+  80% { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(1.1); }
+}
+
+.accept-mascot-overlay {
+  animation: fade-in-scale 2.5s ease-out forwards;
+}

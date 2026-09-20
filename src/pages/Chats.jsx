@@ -184,7 +184,6 @@ const Chats = () => {
   };
 
   const handleAccept = async (matchId) => {
-    alert('Handle accept clicked! Starting animation...');
     if (Capacitor.isNativePlatform()) {
       await Haptics.impact({ style: ImpactStyle.Medium });
     }
@@ -196,7 +195,6 @@ const Chats = () => {
     await new Promise(resolve => setTimeout(resolve, 2000));
     
     setShowAcceptMascot(false);
-    alert('Animation finished! Updating DB...');
 
     await supabase.from('matches').update({ status: 'accepted' }).eq('id', matchId);
     fetchMatches();
@@ -654,31 +652,28 @@ const Chats = () => {
             </motion.h2>
           </motion.div>
         )}
-        {showAcceptMascot && (
-          <motion.div 
-            key="accept-mascot-overlay"
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 1.1 }}
-            transition={{ duration: 0.5, ease: "easeOut" }}
-            style={{
-              position: 'fixed',
-              top: 0, left: 0, right: 0, bottom: 0,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              backgroundColor: 'rgba(248, 244, 237, 0.95)',
-              backdropFilter: 'blur(8px)',
-              zIndex: 9999999,
-              pointerEvents: 'none'
-            }}
-          >
-            <img src={MascotImg} alt="Connection Accepted" style={{ width: '180px', height: 'auto', filter: 'drop-shadow(0px 10px 20px rgba(0,0,0,0.05))' }} />
-            <h2 style={{ fontFamily: 'var(--font-serif)', color: 'var(--primary-teal)', marginTop: '24px', fontWeight: 'normal' }}>Thread Connected.</h2>
-          </motion.div>
-        )}
       </AnimatePresence>
+
+      {showAcceptMascot && (
+        <div 
+          className="accept-mascot-overlay"
+          style={{
+            position: 'fixed',
+            top: 0, left: 0, right: 0, bottom: 0,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: 'rgba(248, 244, 237, 0.95)',
+            backdropFilter: 'blur(8px)',
+            zIndex: 9999999,
+            pointerEvents: 'none'
+          }}
+        >
+          <img src={MascotImg} alt="Connection Accepted" style={{ width: '180px', height: 'auto', filter: 'drop-shadow(0px 10px 20px rgba(0,0,0,0.05))' }} />
+          <h2 style={{ fontFamily: 'var(--font-serif)', color: 'var(--primary-teal)', marginTop: '24px', fontWeight: 'normal' }}>Thread Connected.</h2>
+        </div>
+      )}
 </div>
   );
 };
