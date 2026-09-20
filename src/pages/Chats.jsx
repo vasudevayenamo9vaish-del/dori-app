@@ -239,6 +239,12 @@ const Chats = () => {
 
     setInputText('');
     
+    // Reset textarea height
+    const textarea = document.querySelector('.chat-input-area textarea');
+    if (textarea) {
+      textarea.style.height = 'auto';
+    }
+    
     const { data, error } = await supabase.from('messages').insert([newMsg]).select();
     
     if (error) {
