@@ -366,7 +366,7 @@ const Chats = () => {
         
         {pendingRequests.length > 0 && (
           <div className="pending-section">
-            <h3>Pending Requests</h3>
+            <h3>Pending Connections</h3>
             {pendingRequests.map(req => (
               <div key={req.id} className="match-item pending">
                 <img src={req.requester.avatar_url} alt="avatar" />
@@ -617,6 +617,7 @@ const Chats = () => {
 <AnimatePresence>
         {showHug && (
           <motion.div 
+            key="hug-mascot-overlay"
             className="mascot-hug-overlay"
             initial={{ opacity: 0, scale: 0.5, y: 50 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -653,6 +654,7 @@ const Chats = () => {
         )}
         {showAcceptMascot && (
           <motion.div 
+            key="accept-mascot-overlay"
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 1.1 }}
