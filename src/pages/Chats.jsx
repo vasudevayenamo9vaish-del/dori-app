@@ -10,6 +10,7 @@ import { useBackButton } from '../hooks/useBackButton';
 import { useRingtone } from '../hooks/useRingtone';
 import { Haptics, ImpactStyle } from '@capacitor/haptics';
 import MascotImg from '../assets/mascot.png';
+import MascotHugImg from '../assets/mascot_hug.jpg';
 import './Chats.css';
 
 const Chats = () => {
@@ -597,7 +598,19 @@ const Chats = () => {
         </div>
       )}
 
-      <AnimatePresence>
+      
+      {(videoCallState === 'calling' || videoCallState === 'connected') && (
+        <VideoCall 
+          channel={chatChannelRef.current}
+          isInitiator={videoCallState === 'calling'}
+          onEndCall={() => setVideoCallState(null)}
+          remoteUser={activeChat}
+          currentUser={user}
+        />
+      )}
+
+    
+<AnimatePresence>
         {showHug && (
           <motion.div 
             className="mascot-hug-overlay"
@@ -618,7 +631,7 @@ const Chats = () => {
               pointerEvents: 'none'
             }}
           >
-            <img src={MascotImg} alt="Mascot Hug" style={{ width: '200px', height: 'auto', filter: 'drop-shadow(0px 10px 20px rgba(0,0,0,0.1))' }} />
+            <img src={MascotHugImg} alt="Mascot Hug" style={{ width: '220px', height: 'auto', mixBlendMode: 'multiply', filter: 'drop-shadow(0px 10px 20px rgba(0,0,0,0.1))' }} />
             <h2 style={{ fontFamily: 'var(--font-serif)', color: 'var(--primary-teal)', marginTop: '20px' }}>Sending Warmth...</h2>
           </motion.div>
         )}
@@ -646,17 +659,7 @@ const Chats = () => {
           </motion.div>
         )}
       </AnimatePresence>
-      {(videoCallState === 'calling' || videoCallState === 'connected') && (
-        <VideoCall 
-          channel={chatChannelRef.current}
-          isInitiator={videoCallState === 'calling'}
-          onEndCall={() => setVideoCallState(null)}
-          remoteUser={activeChat}
-          currentUser={user}
-        />
-      )}
-
-    </div>
+</div>
   );
 };
 
