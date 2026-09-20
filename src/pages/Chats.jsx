@@ -4,6 +4,7 @@ import { Send, ArrowLeft, Video, Check, X, ShieldAlert, User, MoreVertical, Ban,
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import ThreadIcon from '../components/ThreadIcon';
+import VideoCall from '../components/VideoCall';
 import { Capacitor } from '@capacitor/core';
 import './Chats.css';
 
@@ -26,6 +27,8 @@ const Chats = () => {
     fetchMatches();
   }, []);
 
+  const [videoCallState, setVideoCallState] = useState(null); // 'calling', 'receiving', 'connected'
+
   useEffect(() => {
     if (activeChat) {
       fetchMessages(activeChat.match_id);
@@ -38,13 +41,32 @@ const Chats = () => {
           table: 'messages',
           filter: `match_id=eq.${activeChat.match_id}`
         }, (payload) => {
-          setMessages(prev => [...prev, payload.new]);
+          setMessages(prev => {
+            const exists = prev?.find(m => m.id === payload.new.id);
+            if (exists) return prev;
+            return [...(prev || []), payload.new];
+          });
           scrollToBottom();
         })
         .on('broadcast', { event: 'typing' }, (payload) => {
-          // If the broadcast is from the other user
           if (payload?.payload?.userId !== user?.id) {
             setIsTyping(payload?.payload?.typing || false);
+          }
+        })
+        .on('broadcast', { event: 'call_invite' }, (payload) => {
+          if (payload?.payload?.userId !== user?.id) {
+            setVideoCallState('receiving');
+          }
+        })
+        .on('broadcast', { event: 'call_accepted' }, (payload) => {
+          if (payload?.payload?.userId !== user?.id) {
+            setVideoCallState('connected');
+          }
+        })
+        .on('broadcast', { event: 'call_declined' }, (payload) => {
+          if (payload?.payload?.userId !== user?.id) {
+            setVideoCallState(null);
+            alert(`${activeChat.first_name} declined the call.`);
           }
         })
         .subscribe();
@@ -334,7 +356,17 @@ const Chats = () => {
         </div>
         <div className="chat-actions" style={{ position: 'relative', display: 'flex', gap: '10px' }}>
           {canVideoCall && (
-            <button className="video-btn" onClick={() => alert("Video calling is coming soon! 🌿")}>
+            <button 
+              className="video-btn" 
+              onClick={() => {
+                setVideoCallState('calling');
+                chatChannelRef.current?.send({
+                  type: 'broadcast',
+                  event: 'call_invite',
+                  payload: { userId: user.id }
+                });
+              }}
+            >
               <Video size={20} />
             </button>
           )}
@@ -401,6 +433,57 @@ const Chats = () => {
           </button>
         </div>
       </div>
+
+      {videoCallState === 'receiving' && (
+        <div className="incoming-call-modal">
+          <div className="incoming-call-content">
+            <div className="pulsing-avatar" style={{ backgroundImage: `url(${activeChat.avatar_url})`, backgroundSize: 'cover' }}>
+              {!activeChat.avatar_url && <User size={40} color="#FFF" style={{margin: 20}}/>}
+            </div>
+            <h3>{activeChat.first_name} is calling...</h3>
+            <div className="call-actions">
+              <button 
+                className="control-btn end-call" 
+                onClick={() => {
+                  setVideoCallState(null);
+                  chatChannelRef.current?.send({
+                    type: 'broadcast',
+                    event: 'call_declined',
+                    payload: { userId: user.id }
+                  });
+                }}
+              >
+                <X size={24} />
+              </button>
+              <button 
+                className="control-btn" 
+                style={{ backgroundColor: 'var(--primary-teal)' }}
+                onClick={() => {
+                  setVideoCallState('connected'); // we are not initiator, we wait for offer
+                  chatChannelRef.current?.send({
+                    type: 'broadcast',
+                    event: 'call_accepted',
+                    payload: { userId: user.id }
+                  });
+                }}
+              >
+                <Video size={24} />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {(videoCallState === 'calling' || videoCallState === 'connected') && (
+        <VideoCall 
+          channel={chatChannelRef.current}
+          isInitiator={videoCallState === 'calling'}
+          onEndCall={() => setVideoCallState(null)}
+          remoteUser={activeChat}
+          currentUser={user}
+        />
+      )}
+
     </div>
   );
 };
