@@ -99,9 +99,25 @@ const Discover = () => {
     setProfiles((prev) => prev.filter((p) => p.id !== id));
     
     try {
-      await supabase.from('matches').insert([
-        { requester_id: user.id, receiver_id: id, status: 'pending' }
-      ]);
+      // First check if a declined/old match already exists between these two
+      const { data: existingMatch } = await supabase
+        .from('matches')
+        .select('id')
+        .or(`and(requester_id.eq.${user.id},receiver_id.eq.${id}),and(requester_id.eq.${id},receiver_id.eq.${user.id})`)
+        .maybeSingle();
+
+      if (existingMatch) {
+        // Update the old match to pending, making sure we are marked as the requester now
+        await supabase
+          .from('matches')
+          .update({ status: 'pending', requester_id: user.id, receiver_id: id })
+          .eq('id', existingMatch.id);
+      } else {
+        // Insert new match if none exists
+        await supabase.from('matches').insert([
+          { requester_id: user.id, receiver_id: id, status: 'pending' }
+        ]);
+      }
       setToast('Connection request sent!');
       setTimeout(() => setToast(null), 3000);
     } catch (err) {
