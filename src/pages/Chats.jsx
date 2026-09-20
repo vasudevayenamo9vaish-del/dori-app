@@ -205,6 +205,13 @@ const Chats = () => {
         
         // Unmatch them to remove from chat list
         await supabase.from('matches').update({ status: 'declined' }).eq('id', activeChat.match_id);
+
+        // Add to reports table for admin moderation
+        await supabase.from('reports').insert([{
+          reporter_id: user.id,
+          reported_id: blockedUserId,
+          reason: "User blocked and reported"
+        }]);
         
         setActiveChat(null);
         setShowBlockMenu(false);
