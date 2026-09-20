@@ -90,7 +90,11 @@ const Chats = () => {
 
   const handleWithdraw = async (matchId) => {
     if (window.confirm("Are you sure you want to withdraw this request?")) {
-      await supabase.from('matches').delete().eq('id', matchId);
+      const { error } = await supabase.from('matches').update({ status: 'declined' }).eq('id', matchId);
+      if (error) {
+        console.error("Error withdrawing request:", error);
+        alert("Error withdrawing: " + error.message);
+      }
       fetchMatches();
     }
   };
