@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, ArrowLeft, Video, Check, X, ShieldAlert, User, MoreVertical, Ban, RefreshCw } from 'lucide-react';
+import { Send, ArrowLeft, Video, Check, X, ShieldAlert, User, MoreVertical, Ban, RefreshCw, HandHeart, BellOff, BellRing, UserMinus } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import ThreadIcon from '../components/ThreadIcon';
@@ -33,6 +33,8 @@ const Chats = () => {
   }, []);
 
   const [videoCallState, setVideoCallState] = useState(null); // 'calling', 'receiving', 'connected'
+  const [isMuted, setIsMuted] = useState(false);
+  const [showHug, setShowHug] = useState(false);
 
   useRingtone(videoCallState === 'receiving');
 
@@ -95,7 +97,20 @@ const Chats = () => {
             alert(`${activeChat.first_name} declined the call.`);
           }
         })
+        .on('broadcast', { event: 'mascot_hug' }, async (payload) => {
+          if (payload?.payload?.userId !== user?.id) {
+            if (Capacitor.isNativePlatform()) {
+              await Haptics.impact({ style: ImpactStyle.Heavy });
+              setTimeout(() => Haptics.impact({ style: ImpactStyle.Heavy }), 400);
+            }
+            setShowHug(true);
+            setTimeout(() => setShowHug(false), 4000);
+          }
+        })
         .subscribe();
+        
+      // Initialize mute state for this chat
+      setIsMuted(localStorage.getItem(`muted_${activeChat.match_id}`) === 'true');
 
       chatChannelRef.current = channel;
 
@@ -209,6 +224,26 @@ const Chats = () => {
       setMessages(data || []);
       scrollToBottom();
     }
+  };
+
+  const handleUnmatch = async () => {
+    if (window.confirm("Are you sure you want to unmatch? You won't be able to chat unless you connect again.")) {
+      await supabase.from('matches').update({ status: 'declined' }).eq('id', activeChat.match_id);
+      setActiveChat(null);
+      setShowBlockMenu(false);
+      fetchMatches();
+    }
+  };
+
+  const handleMuteToggle = () => {
+    const newState = !isMuted;
+    setIsMuted(newState);
+    if (newState) {
+      localStorage.setItem(`muted_${activeChat.match_id}`, 'true');
+    } else {
+      localStorage.removeItem(`muted_${activeChat.match_id}`);
+    }
+    setShowBlockMenu(false);
   };
 
   const handleBlock = async () => {
@@ -431,12 +466,33 @@ const Chats = () => {
               <Video size={20} />
             </button>
           )}
+          <button 
+            className="video-btn" 
+            onClick={() => {
+              chatChannelRef.current?.send({
+                type: 'broadcast',
+                event: 'mascot_hug',
+                payload: { userId: user.id }
+              });
+              // Show it locally too
+              setShowHug(true);
+              setTimeout(() => setShowHug(false), 4000);
+            }}
+          >
+            <HandHeart size={20} />
+          </button>
           <button className="video-btn" onClick={() => setShowBlockMenu(!showBlockMenu)}>
             <MoreVertical size={20} />
           </button>
           {showBlockMenu && (
             <div className="block-menu">
-              <button onClick={handleBlock} className="block-btn">
+              <button onClick={handleUnmatch} className="block-btn">
+                <UserMinus size={16} /> Unmatch
+              </button>
+              <button onClick={handleMuteToggle} className="block-btn">
+                {isMuted ? <><BellRing size={16} /> Unmute</> : <><BellOff size={16} /> Mute Notifications</>}
+              </button>
+              <button onClick={handleBlock} className="block-btn danger">
                 <Ban size={16} /> Block & Report
               </button>
             </div>
@@ -542,6 +598,33 @@ const Chats = () => {
           </div>
         </div>
       )}
+
+      <AnimatePresence>
+        {showHug && (
+          <motion.div 
+            className="mascot-hug-overlay"
+            initial={{ opacity: 0, scale: 0.5, y: 50 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 1.2, y: -50 }}
+            transition={{ type: "spring", bounce: 0.5 }}
+            style={{
+              position: 'absolute',
+              top: 0, left: 0, right: 0, bottom: 0,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: 'rgba(248, 244, 237, 0.85)',
+              backdropFilter: 'blur(4px)',
+              zIndex: 3000,
+              pointerEvents: 'none'
+            }}
+          >
+            <img src="/assets/mascot.png" alt="Mascot Hug" style={{ width: '200px', height: 'auto', filter: 'drop-shadow(0px 10px 20px rgba(0,0,0,0.1))' }} />
+            <h2 style={{ fontFamily: 'var(--font-serif)', color: 'var(--primary-teal)', marginTop: '20px' }}>Sending Warmth...</h2>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {(videoCallState === 'calling' || videoCallState === 'connected') && (
         <VideoCall 
