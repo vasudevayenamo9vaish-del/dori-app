@@ -391,10 +391,7 @@
   text-align: right;
 }
 
-.message-bubble.me .msg-time {
-  color: rgba(255, 255, 255, 0.8);
-}
-
+.message-bubble.me .msg-time,
 .message-bubble.them .msg-time {
-  color: var(--text-muted);
+  color: rgba(255, 255, 255, 0.6);
 }
