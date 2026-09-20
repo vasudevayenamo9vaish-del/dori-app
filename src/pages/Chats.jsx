@@ -402,4 +402,12 @@ const Chats = () => {
   );
 };
 
-export default Chats;
+import ErrorBoundary from '../components/ErrorBoundary';
+
+export default function ChatsWithErrorBoundary(props) {
+  return (
+    <ErrorBoundary>
+      <Chats {...props} />
+    </ErrorBoundary>
+  );
+}
