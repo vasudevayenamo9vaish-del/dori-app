@@ -11,8 +11,7 @@ import Profile from './pages/Profile';
 import Landing from './pages/Landing';
 import { useAuth } from './contexts/AuthContext';
 import ThreadIcon from './components/ThreadIcon';
-import { usePushNotifications } from './hooks/usePushNotifications';
-import { useLocalNotifications } from './hooks/useLocalNotifications';
+import GlobalHooks from './components/GlobalHooks';
 
 import ResetPassword from './pages/ResetPassword';
 
@@ -31,8 +30,6 @@ const Layout = ({ children }) => {
 
 const App = () => {
   const { user, profile, loading } = useAuth();
-  usePushNotifications(user);
-  useLocalNotifications();
 
   if (loading) {
     return (
@@ -53,6 +50,7 @@ const App = () => {
         </Routes>
       ) : (
         <Layout>
+          <GlobalHooks />
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/discover" element={<Discover />} />

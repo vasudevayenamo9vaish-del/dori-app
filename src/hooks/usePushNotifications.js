@@ -3,7 +3,7 @@ import { PushNotifications } from '@capacitor/push-notifications';
 import { Capacitor } from '@capacitor/core';
 import { supabase } from '../lib/supabase';
 
-export const usePushNotifications = (user) => {
+export const usePushNotifications = (user, navigate) => {
   useEffect(() => {
     // Only run this on mobile devices (Android/iOS)
     if (!Capacitor.isNativePlatform()) return;
@@ -58,6 +58,10 @@ export const usePushNotifications = (user) => {
 
       await PushNotifications.addListener('pushNotificationActionPerformed', notification => {
         console.log('Push action performed: ', notification);
+        // Deep link to chats when tapping a notification
+        if (navigate) {
+          navigate('/chats');
+        }
       });
     };
 

@@ -6,6 +6,7 @@ import { useAuth } from '../contexts/AuthContext';
 import ThreadIcon from '../components/ThreadIcon';
 import VideoCall from '../components/VideoCall';
 import { Capacitor } from '@capacitor/core';
+import { useBackButton } from '../hooks/useBackButton';
 import './Chats.css';
 
 const Chats = () => {
@@ -28,6 +29,25 @@ const Chats = () => {
   }, []);
 
   const [videoCallState, setVideoCallState] = useState(null); // 'calling', 'receiving', 'connected'
+
+  useBackButton(() => {
+    if (videoCallState) {
+      // First back button press ends the video call if active
+      setVideoCallState(null);
+      chatChannelRef.current?.send({
+        type: 'broadcast',
+        event: 'call_ended',
+        payload: { userId: user.id }
+      });
+      return true; // Handled
+    }
+    if (activeChat) {
+      // Second back button press goes back to the list
+      setActiveChat(null);
+      return true; // Handled
+    }
+    return false; // Let default router handle it
+  });
 
   useEffect(() => {
     if (activeChat) {
