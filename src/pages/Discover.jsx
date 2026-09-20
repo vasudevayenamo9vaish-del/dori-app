@@ -123,6 +123,9 @@ const Discover = () => {
       setTimeout(() => setToast(null), 3000);
     } catch (err) {
       console.error('Failed to send match request:', err);
+      alert('Error sending request: ' + (err.message || JSON.stringify(err)));
+      // Re-fetch profiles so the user reappears if it failed
+      fetchProfiles();
     }
   };
 
