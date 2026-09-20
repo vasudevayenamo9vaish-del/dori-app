@@ -99,12 +99,9 @@ const Discover = () => {
     setProfiles((prev) => prev.filter((p) => p.id !== id));
     
     try {
-      // 1. Forcefully delete ANY existing rows between these two users (whether 1 row or 5 rows)
-      // This guarantees no "duplicate key" constraints or multiple-row conflicts.
-      await supabase
-        .from('matches')
-        .delete()
-        .or(`and(requester_id.eq.${user.id},receiver_id.eq.${id}),and(requester_id.eq.${id},receiver_id.eq.${user.id})`);
+      // 1. Forcefully delete ANY existing rows (split into two simple queries to avoid syntax bugs)
+      await supabase.from('matches').delete().eq('requester_id', user.id).eq('receiver_id', id);
+      await supabase.from('matches').delete().eq('requester_id', id).eq('receiver_id', user.id);
       
       // 2. Insert the fresh new match request cleanly
       const { error } = await supabase.from('matches').insert([
