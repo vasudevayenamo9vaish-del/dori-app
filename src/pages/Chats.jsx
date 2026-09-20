@@ -9,7 +9,6 @@ import { Capacitor } from '@capacitor/core';
 import { useBackButton } from '../hooks/useBackButton';
 import { useRingtone } from '../hooks/useRingtone';
 import { Haptics, ImpactStyle } from '@capacitor/haptics';
-import confetti from 'canvas-confetti';
 import './Chats.css';
 
 const Chats = () => {
@@ -35,6 +34,7 @@ const Chats = () => {
   const [videoCallState, setVideoCallState] = useState(null); // 'calling', 'receiving', 'connected'
   const [isMuted, setIsMuted] = useState(false);
   const [showHug, setShowHug] = useState(false);
+  const [showAcceptMascot, setShowAcceptMascot] = useState(false);
 
   useRingtone(videoCallState === 'receiving');
 
@@ -186,12 +186,9 @@ const Chats = () => {
       await Haptics.impact({ style: ImpactStyle.Medium });
     }
     
-    confetti({
-      particleCount: 100,
-      spread: 70,
-      origin: { y: 0.6 },
-      colors: ['#E6A89B', '#4A7C82', '#F8F4ED']
-    });
+    // Show elegant mascot instead of confetti
+    setShowAcceptMascot(true);
+    setTimeout(() => setShowAcceptMascot(false), 2500);
 
     await supabase.from('matches').update({ status: 'accepted' }).eq('id', matchId);
     fetchMatches();
@@ -624,8 +621,30 @@ const Chats = () => {
             <h2 style={{ fontFamily: 'var(--font-serif)', color: 'var(--primary-teal)', marginTop: '20px' }}>Sending Warmth...</h2>
           </motion.div>
         )}
+        {showAcceptMascot && (
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 1.1 }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
+            style={{
+              position: 'absolute',
+              top: 0, left: 0, right: 0, bottom: 0,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: 'rgba(248, 244, 237, 0.95)',
+              backdropFilter: 'blur(8px)',
+              zIndex: 3000,
+              pointerEvents: 'none'
+            }}
+          >
+            <img src="/assets/mascot.png" alt="Connection Accepted" style={{ width: '180px', height: 'auto', filter: 'drop-shadow(0px 10px 20px rgba(0,0,0,0.05))' }} />
+            <h2 style={{ fontFamily: 'var(--font-serif)', color: 'var(--primary-teal)', marginTop: '24px', fontWeight: 'normal' }}>Thread Connected.</h2>
+          </motion.div>
+        )}
       </AnimatePresence>
-
       {(videoCallState === 'calling' || videoCallState === 'connected') && (
         <VideoCall 
           channel={chatChannelRef.current}
