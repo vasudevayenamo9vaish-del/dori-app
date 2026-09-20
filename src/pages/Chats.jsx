@@ -24,6 +24,7 @@ const Chats = () => {
   const typingTimeoutRef = useRef(null);
   const chatChannelRef = useRef(null);
   const messagesEndRef = useRef(null);
+  const textareaRef = useRef(null);
 
   useEffect(() => {
     fetchMatches();
@@ -239,11 +240,12 @@ const Chats = () => {
 
     setInputText('');
     
-    // Reset textarea height
-    const textarea = document.querySelector('.chat-input-area textarea');
-    if (textarea) {
-      textarea.style.height = 'auto';
-    }
+    // Reset textarea height robustly after React state updates
+    setTimeout(() => {
+      if (textareaRef.current) {
+        textareaRef.current.style.height = 'auto';
+      }
+    }, 10);
     
     const { data, error } = await supabase.from('messages').insert([newMsg]).select();
     
@@ -466,6 +468,7 @@ const Chats = () => {
       <div className="chat-input-area">
         <div className="input-wrapper">
           <textarea 
+            ref={textareaRef}
             rows="1"
             placeholder="Type gently..." 
             value={inputText}
