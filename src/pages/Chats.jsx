@@ -619,7 +619,7 @@ const Chats = () => {
             exit={{ opacity: 0, scale: 1.2, y: -50 }}
             transition={{ type: "spring", bounce: 0.5 }}
             style={{
-              position: 'absolute',
+              position: 'fixed',
               top: 0, left: 0, right: 0, bottom: 0,
               display: 'flex',
               flexDirection: 'column',
@@ -642,7 +642,7 @@ const Chats = () => {
             exit={{ opacity: 0, scale: 1.1 }}
             transition={{ duration: 0.5, ease: "easeOut" }}
             style={{
-              position: 'absolute',
+              position: 'fixed',
               top: 0, left: 0, right: 0, bottom: 0,
               display: 'flex',
               flexDirection: 'column',
