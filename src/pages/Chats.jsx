@@ -184,6 +184,7 @@ const Chats = () => {
   };
 
   const handleAccept = async (matchId) => {
+    alert('Handle accept clicked! Starting animation...');
     if (Capacitor.isNativePlatform()) {
       await Haptics.impact({ style: ImpactStyle.Medium });
     }
@@ -195,6 +196,7 @@ const Chats = () => {
     await new Promise(resolve => setTimeout(resolve, 2000));
     
     setShowAcceptMascot(false);
+    alert('Animation finished! Updating DB...');
 
     await supabase.from('matches').update({ status: 'accepted' }).eq('id', matchId);
     fetchMatches();
@@ -668,7 +670,7 @@ const Chats = () => {
               justifyContent: 'center',
               backgroundColor: 'rgba(248, 244, 237, 0.95)',
               backdropFilter: 'blur(8px)',
-              zIndex: 3000,
+              zIndex: 9999999,
               pointerEvents: 'none'
             }}
           >
