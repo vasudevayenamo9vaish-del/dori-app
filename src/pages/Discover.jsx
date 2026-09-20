@@ -99,14 +99,11 @@ const Discover = () => {
     setProfiles((prev) => prev.filter((p) => p.id !== id));
     
     try {
-      // 1. Forcefully delete ANY existing rows (split into two simple queries to avoid syntax bugs)
-      await supabase.from('matches').delete().eq('requester_id', user.id).eq('receiver_id', id);
-      await supabase.from('matches').delete().eq('requester_id', id).eq('receiver_id', user.id);
-      
-      // 2. Insert the fresh new match request cleanly
-      const { error } = await supabase.from('matches').insert([
-        { requester_id: user.id, receiver_id: id, status: 'pending' }
-      ]);
+      // Use native Postgres UPSERT to absolutely guarantee no duplicate key errors
+      const { error } = await supabase.from('matches').upsert(
+        { requester_id: user.id, receiver_id: id, status: 'pending' },
+        { onConflict: 'requester_id,receiver_id' }
+      );
       
       if (error) throw error;
       setToast('Connection request sent!');
