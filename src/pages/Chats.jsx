@@ -106,6 +106,12 @@ const Chats = () => {
   const handleTyping = (e) => {
     setInputText(e.target.value);
     
+    // Auto-resize logic for textarea
+    if (e.target.tagName.toLowerCase() === 'textarea') {
+      e.target.style.height = 'auto';
+      e.target.style.height = Math.min(e.target.scrollHeight, 120) + 'px';
+    }
+
     if (chatChannelRef.current) {
       chatChannelRef.current.send({
         type: 'broadcast',
@@ -423,6 +429,7 @@ const Chats = () => {
         <div className="chat-thread-line"></div>
         {(messages || []).map((msg) => {
           const isMe = msg.sender_id === user.id;
+          const time = new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
           return (
             <motion.div 
               key={msg.id}
@@ -431,6 +438,7 @@ const Chats = () => {
               animate={{ opacity: 1, y: 0 }}
             >
               <p>{msg.text}</p>
+              <span className="msg-time">{time}</span>
             </motion.div>
           );
         })}
@@ -451,14 +459,19 @@ const Chats = () => {
       {/* Input */}
       <div className="chat-input-area">
         <div className="input-wrapper">
-          <input 
-            type="text" 
+          <textarea 
+            rows="1"
             placeholder="Type gently..." 
             value={inputText}
             onChange={handleTyping}
-            onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                if (inputText.trim()) handleSend();
+              }
+            }}
           />
-          <button className="send-btn" onClick={handleSend}>
+          <button className="send-btn" onClick={handleSend} disabled={!inputText.trim()}>
             <Send size={18} />
           </button>
         </div>
