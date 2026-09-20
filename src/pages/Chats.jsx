@@ -9,6 +9,7 @@ import { Capacitor } from '@capacitor/core';
 import { useBackButton } from '../hooks/useBackButton';
 import { useRingtone } from '../hooks/useRingtone';
 import { Haptics, ImpactStyle } from '@capacitor/haptics';
+import MascotImg from '../assets/mascot.png';
 import './Chats.css';
 
 const Chats = () => {
@@ -617,7 +618,7 @@ const Chats = () => {
               pointerEvents: 'none'
             }}
           >
-            <img src="/assets/mascot.png" alt="Mascot Hug" style={{ width: '200px', height: 'auto', filter: 'drop-shadow(0px 10px 20px rgba(0,0,0,0.1))' }} />
+            <img src={MascotImg} alt="Mascot Hug" style={{ width: '200px', height: 'auto', filter: 'drop-shadow(0px 10px 20px rgba(0,0,0,0.1))' }} />
             <h2 style={{ fontFamily: 'var(--font-serif)', color: 'var(--primary-teal)', marginTop: '20px' }}>Sending Warmth...</h2>
           </motion.div>
         )}
@@ -640,7 +641,7 @@ const Chats = () => {
               pointerEvents: 'none'
             }}
           >
-            <img src="/assets/mascot.png" alt="Connection Accepted" style={{ width: '180px', height: 'auto', filter: 'drop-shadow(0px 10px 20px rgba(0,0,0,0.05))' }} />
+            <img src={MascotImg} alt="Connection Accepted" style={{ width: '180px', height: 'auto', filter: 'drop-shadow(0px 10px 20px rgba(0,0,0,0.05))' }} />
             <h2 style={{ fontFamily: 'var(--font-serif)', color: 'var(--primary-teal)', marginTop: '24px', fontWeight: 'normal' }}>Thread Connected.</h2>
           </motion.div>
         )}
