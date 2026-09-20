@@ -7,6 +7,7 @@ import ThreadIcon from '../components/ThreadIcon';
 import VideoCall from '../components/VideoCall';
 import { Capacitor } from '@capacitor/core';
 import { useBackButton } from '../hooks/useBackButton';
+import { useRingtone } from '../hooks/useRingtone';
 import './Chats.css';
 
 const Chats = () => {
@@ -29,6 +30,8 @@ const Chats = () => {
   }, []);
 
   const [videoCallState, setVideoCallState] = useState(null); // 'calling', 'receiving', 'connected'
+
+  useRingtone(videoCallState === 'receiving');
 
   useBackButton(() => {
     if (videoCallState) {

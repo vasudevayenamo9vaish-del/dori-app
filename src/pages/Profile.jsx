@@ -247,9 +247,19 @@ const Profile = () => {
             </div>
           )}
 
-          <button type="submit" disabled={loading} className="save-btn">
-            {loading ? 'Saving...' : 'Save Changes'}
-          </button>
+          <div className="profile-actions">
+            <button type="submit" className="save-btn" disabled={loading}>
+              {loading ? 'Saving...' : 'Save Profile'}
+            </button>
+            <button type="button" className="signout-btn" onClick={handleLogout}>
+              <LogOut size={16} /> Sign Out
+            </button>
+          </div>
+
+          <div className="legal-links" style={{ display: 'flex', justifyContent: 'center', gap: '20px', marginTop: '20px', fontSize: '0.8rem' }}>
+            <a href="https://dori.app/privacy" target="_blank" rel="noreferrer" style={{ color: 'var(--text-muted)' }}>Privacy Policy</a>
+            <a href="https://dori.app/terms" target="_blank" rel="noreferrer" style={{ color: 'var(--text-muted)' }}>Terms of Service</a>
+          </div>
         </form>
 
         {blockedUsers.length > 0 && (
