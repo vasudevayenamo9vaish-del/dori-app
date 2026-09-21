@@ -38,6 +38,20 @@ const Chats = () => {
   const [isMuted, setIsMuted] = useState(false);
   const [showHug, setShowHug] = useState(false);
   const [showAcceptMascot, setShowAcceptMascot] = useState(false);
+  const [acceptedMatchId, setAcceptedMatchId] = useState(null);
+
+  useEffect(() => {
+    if (acceptedMatchId) {
+      setShowAcceptMascot(true);
+      const timer = setTimeout(async () => {
+        setShowAcceptMascot(false);
+        await supabase.from('matches').update({ status: 'accepted' }).eq('id', acceptedMatchId);
+        fetchMatches();
+        setAcceptedMatchId(null);
+      }, 2500);
+      return () => clearTimeout(timer);
+    }
+  }, [acceptedMatchId]);
 
   useRingtone(videoCallState === 'receiving');
 
@@ -98,6 +112,11 @@ const Chats = () => {
           if (payload?.payload?.userId !== user?.id) {
             setVideoCallState(null);
             alert(`${activeChat.first_name} declined the call.`);
+          }
+        })
+        .on('broadcast', { event: 'call_ended' }, (payload) => {
+          if (payload?.payload?.userId !== user?.id) {
+            setVideoCallState(null);
           }
         })
         .on('broadcast', { event: 'mascot_hug' }, async (payload) => {
@@ -189,16 +208,21 @@ const Chats = () => {
       await Haptics.impact({ style: ImpactStyle.Medium });
     }
     
-    // Show elegant mascot instead of confetti
-    setShowAcceptMascot(true);
-    
-    // Wait for the animation to finish playing before wiping the UI
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    setShowAcceptMascot(false);
+    const overlay = document.createElement('div');
+    overlay.style.cssText = "position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(248, 244, 237, 0.95); z-index: 2147483647; display: flex; flex-direction: column; align-items: center; justify-content: center; animation: fade-in-scale 2.5s ease-out forwards; backdrop-filter: blur(10px); pointer-events: none;";
+    overlay.innerHTML = `
+      <img src="${MascotImg}" style="width: 180px; filter: drop-shadow(0px 10px 20px rgba(0,0,0,0.1));" />
+      <h2 style="font-family: var(--font-serif); color: var(--primary-teal); margin-top: 24px; font-weight: normal;">Thread Connected.</h2>
+    `;
+    document.body.appendChild(overlay);
 
-    await supabase.from('matches').update({ status: 'accepted' }).eq('id', matchId);
-    fetchMatches();
+    setTimeout(async () => {
+      if (document.body.contains(overlay)) {
+        document.body.removeChild(overlay);
+      }
+      await supabase.from('matches').update({ status: 'accepted' }).eq('id', matchId);
+      fetchMatches();
+    }, 2500);
   };
 
   const handleDecline = async (matchId) => {
@@ -620,10 +644,10 @@ const Chats = () => {
           <motion.div 
             key="hug-mascot-overlay"
             className="mascot-hug-overlay"
-            initial={{ opacity: 0, scale: 0.5, y: 50 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 1.2, y: -50 }}
-            transition={{ type: "spring", bounce: 0.5 }}
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 1.05 }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
             style={{
               position: 'fixed',
               top: 0, left: 0, right: 0, bottom: 0,
@@ -631,22 +655,99 @@ const Chats = () => {
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
-              backgroundColor: 'rgba(248, 244, 237, 0.85)',
-              backdropFilter: 'blur(4px)',
-              zIndex: 3000,
+              backgroundColor: 'rgba(248, 244, 237, 0.93)',
+              backdropFilter: 'blur(12px)',
+              zIndex: 9999999,
               pointerEvents: 'none'
             }}
           >
-            <img src={MascotHugImg} alt="Mascot Hug" style={{ width: '220px', height: 'auto', mixBlendMode: 'multiply', filter: 'drop-shadow(0px 10px 20px rgba(0,0,0,0.1))' }} />
+            <div style={{ position: 'relative', width: '240px', height: '240px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              {/* Terracotta Inner Warm Glow */}
+              <motion.div
+                animate={{ scale: [1, 1.15, 1], opacity: [0.3, 0.7, 0.3] }}
+                transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
+                style={{
+                  position: 'absolute',
+                  width: '100%',
+                  height: '100%',
+                  borderRadius: '50%',
+                  background: 'radial-gradient(circle, var(--accent-terracotta) 0%, rgba(217, 119, 106, 0) 70%)',
+                  filter: 'blur(30px)',
+                  zIndex: 1
+                }}
+              />
+              {/* Gold Outer Radiant Glow */}
+              <motion.div
+                animate={{ scale: [1.1, 0.95, 1.1], opacity: [0.15, 0.4, 0.15], rotate: [0, 15, 0] }}
+                transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
+                style={{
+                  position: 'absolute',
+                  width: '130%',
+                  height: '130%',
+                  borderRadius: '50%',
+                  background: 'radial-gradient(circle, var(--accent-gold) 0%, rgba(212, 163, 115, 0) 65%)',
+                  filter: 'blur(35px)',
+                  zIndex: 0
+                }}
+              />
+              
+              {/* Floating Hearts bursting from the mascot */}
+              {[...Array(5)].map((_, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, scale: 0, x: 0, y: 0 }}
+                  animate={{ 
+                    opacity: [0, 0.8, 0], 
+                    scale: [0.5, 1.2, 1.5], 
+                    x: (i % 2 === 0 ? 1 : -1) * (30 + Math.random() * 60), 
+                    y: -40 - Math.random() * 80 
+                  }}
+                  transition={{ 
+                    duration: 2.5 + Math.random(), 
+                    repeat: Infinity, 
+                    delay: i * 0.4,
+                    ease: "easeOut"
+                  }}
+                  style={{
+                    position: 'absolute',
+                    color: 'var(--accent-terracotta)',
+                    zIndex: 3,
+                    filter: 'drop-shadow(0 0 10px rgba(217, 119, 106, 0.4))'
+                  }}
+                >
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                  </svg>
+                </motion.div>
+              ))}
+
+              {/* Mascot floating towards the user (no background) */}
+              <motion.img 
+                animate={{ scale: [1, 1.15, 1], y: [0, -10, 0] }}
+                transition={{ repeat: Infinity, duration: 3.5, ease: "easeInOut" }}
+                src={MascotHugImg} 
+                alt="Mascot Hug" 
+                style={{ 
+                  width: '240px', 
+                  height: 'auto', 
+                  WebkitMaskImage: 'radial-gradient(circle at center, black 45%, transparent 70%)',
+                  maskImage: 'radial-gradient(circle at center, black 45%, transparent 70%)',
+                  zIndex: 2,
+                  position: 'relative'
+                }} 
+              />
+            </div>
+            
             <motion.h2 
-              animate={{ opacity: [0.6, 1, 0.6], textShadow: ["0 0 5px rgba(74, 124, 130, 0.2)", "0 0 15px rgba(74, 124, 130, 0.6)", "0 0 5px rgba(74, 124, 130, 0.2)"] }}
-              transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
+              animate={{ opacity: [0.65, 1, 0.65], textShadow: ["0 0 10px rgba(217, 119, 106, 0.2)", "0 0 25px rgba(217, 119, 106, 0.65)", "0 0 10px rgba(217, 119, 106, 0.2)"] }}
+              transition={{ repeat: Infinity, duration: 2.5, ease: "easeInOut" }}
               style={{ 
-                fontFamily: 'var(--font-serif)', 
-                color: 'var(--primary-teal)', 
-                marginTop: '20px',
+                color: 'var(--accent-terracotta)', 
+                marginTop: '45px',
                 fontStyle: 'italic',
-                fontWeight: '400'
+                fontWeight: '500',
+                letterSpacing: '0.8px',
+                fontSize: '26px'
               }}
             >
               Sending Warmth<span className="animated-dots"></span>
@@ -655,27 +756,7 @@ const Chats = () => {
         )}
       </AnimatePresence>
 
-      {showAcceptMascot && createPortal(
-        <div 
-          className="accept-mascot-overlay"
-          style={{
-            position: 'fixed',
-            top: 0, left: 0, right: 0, bottom: 0,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            backgroundColor: 'rgba(248, 244, 237, 0.95)',
-            backdropFilter: 'blur(8px)',
-            zIndex: 9999999,
-            pointerEvents: 'none'
-          }}
-        >
-          <img src={MascotImg} alt="Connection Accepted" style={{ width: '180px', height: 'auto', filter: 'drop-shadow(0px 10px 20px rgba(0,0,0,0.05))' }} />
-          <h2 style={{ fontFamily: 'var(--font-serif)', color: 'var(--primary-teal)', marginTop: '24px', fontWeight: 'normal' }}>Thread Connected.</h2>
-        </div>,
-        document.body
-      )}
+      
 </div>
   );
 };

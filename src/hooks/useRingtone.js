@@ -6,57 +6,61 @@ export const useRingtone = (isRinging) => {
 
   useEffect(() => {
     if (isRinging) {
-      // Setup AudioContext
       const AudioContext = window.AudioContext || window.webkitAudioContext;
       if (!AudioContext) return;
       
       audioCtxRef.current = new AudioContext();
 
-      const playTone = () => {
+      const playEmotionalPad = () => {
         if (!audioCtxRef.current) return;
         
         const t = audioCtxRef.current.currentTime;
         
-        // Gentle marimba/bell sound
-        const osc1 = audioCtxRef.current.createOscillator();
-        const osc2 = audioCtxRef.current.createOscillator();
-        const gainNode = audioCtxRef.current.createGain();
+        // A majestic, emotional Major 9th chord (warm, nostalgic, peaceful)
+        // Frequencies: A3, E4, G#4, B4
+        const frequencies = [220.00, 329.63, 415.30, 493.88]; 
         
-        osc1.type = 'sine';
-        osc1.frequency.setValueAtTime(523.25, t); // C5
+        const masterGain = audioCtxRef.current.createGain();
         
-        osc2.type = 'sine';
-        osc2.frequency.setValueAtTime(659.25, t); // E5
+        // Slow, emotional breath-like swell
+        masterGain.gain.setValueAtTime(0, t);
+        masterGain.gain.linearRampToValueAtTime(0.3, t + 1.5); // Very slow, gentle fade in
+        masterGain.gain.exponentialRampToValueAtTime(0.001, t + 5.5); // Luxurious, long fade out
         
-        gainNode.gain.setValueAtTime(0, t);
-        gainNode.gain.linearRampToValueAtTime(0.3, t + 0.1);
-        gainNode.gain.exponentialRampToValueAtTime(0.01, t + 1.0);
+        frequencies.forEach(freq => {
+            // Pure sine waves give that crystal clear singing bowl / meditation pad sound
+            const osc = audioCtxRef.current.createOscillator();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, t);
+            
+            // Add a tiny, microscopic wobble (chorus) to make it sound organic and human, not digital
+            const lfo = audioCtxRef.current.createOscillator();
+            lfo.type = 'sine';
+            lfo.frequency.value = 0.15; 
+            const lfoGain = audioCtxRef.current.createGain();
+            lfoGain.gain.value = 1.5; 
+            lfo.connect(lfoGain);
+            lfoGain.connect(osc.frequency);
+            lfo.start(t);
+            lfo.stop(t + 6.0);
+            
+            osc.connect(masterGain);
+            osc.start(t);
+            osc.stop(t + 6.0);
+        });
         
-        osc1.connect(gainNode);
-        osc2.connect(gainNode);
-        gainNode.connect(audioCtxRef.current.destination);
-        
-        osc1.start(t);
-        osc2.start(t);
-        osc1.stop(t + 1.2);
-        osc2.stop(t + 1.2);
+        masterGain.connect(audioCtxRef.current.destination);
       };
 
-      // Play pattern: Ring... Ring... (pause)
-      playTone();
-      setTimeout(() => { if(isRinging) playTone(); }, 1500);
-
-      intervalRef.current = setInterval(() => {
-        playTone();
-        setTimeout(() => { if(isRinging) playTone(); }, 1500);
-      }, 4000);
-
+      playEmotionalPad();
+      // Swell breathes in and out every 6 seconds
+      intervalRef.current = setInterval(playEmotionalPad, 6000);
     } else {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
       }
       if (audioCtxRef.current) {
-        audioCtxRef.current.close();
+        audioCtxRef.current.close().catch(e => {});
         audioCtxRef.current = null;
       }
     }

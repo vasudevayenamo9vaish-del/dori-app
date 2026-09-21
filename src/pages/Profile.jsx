@@ -49,9 +49,11 @@ const Profile = () => {
     fetchProfile();
   };
   
-  const handleImageUpload = (e) => {
+  const handleImageUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
+    
+    setLoading(true);
 
     const reader = new FileReader();
     reader.onload = (event) => {
@@ -79,8 +81,37 @@ const Profile = () => {
         const ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0, width, height);
         
-        const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
-        setAvatarUrl(dataUrl);
+        canvas.toBlob(async (blob) => {
+          if (!blob) {
+            setLoading(false);
+            return;
+          }
+          
+          const fileName = `${user.id}-${Date.now()}.jpeg`;
+
+          try {
+            const { error: uploadError } = await supabase.storage
+              .from('avatars')
+              .upload(fileName, blob, {
+                contentType: 'image/jpeg',
+                upsert: true
+              });
+
+            if (uploadError) {
+              console.error('Upload error:', uploadError);
+              alert('Failed to upload image. Please ensure the Supabase SQL setup script was run.');
+              setLoading(false);
+              return;
+            }
+
+            const { data } = supabase.storage.from('avatars').getPublicUrl(fileName);
+            setAvatarUrl(data.publicUrl);
+          } catch (err) {
+            console.error(err);
+          } finally {
+            setLoading(false);
+          }
+        }, 'image/jpeg', 0.8);
       };
       img.src = event.target.result;
     };
@@ -132,6 +163,23 @@ const Profile = () => {
 
   const handleLogout = async () => {
     await signOut();
+  };
+
+  const handleDeleteAccount = async () => {
+    if (window.confirm("Are you absolutely sure you want to delete your account? This action cannot be undone and all your data will be permanently erased.")) {
+      setLoading(true);
+      try {
+        // We will instruct the user to create this RPC function in their Supabase dashboard
+        const { error } = await supabase.rpc('delete_user');
+        if (error) throw error;
+        await signOut();
+      } catch (error) {
+        console.error('Error deleting account:', error);
+        alert('Failed to delete account. Please try again or contact support.');
+      } finally {
+        setLoading(false);
+      }
+    }
   };
 
   return (
@@ -276,9 +324,33 @@ const Profile = () => {
           </div>
         )}
 
-        <button className="logout-btn" onClick={handleLogout}>
+        <button className="logout-btn" onClick={handleLogout} style={{ marginBottom: '15px' }}>
           <LogOut size={18} />
           Sign Out
+        </button>
+
+        <button 
+          className="delete-account-btn" 
+          onClick={handleDeleteAccount}
+          style={{
+            background: 'transparent',
+            border: '1px solid #FF4D4D',
+            color: '#FF4D4D',
+            width: '100%',
+            padding: '16px',
+            borderRadius: '12px',
+            fontSize: '1rem',
+            fontWeight: '600',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '8px',
+            marginTop: '20px',
+            marginBottom: '40px'
+          }}
+        >
+          Delete Account
         </button>
       </motion.div>
     </div>
