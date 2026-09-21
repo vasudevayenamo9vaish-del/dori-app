@@ -22,32 +22,19 @@ export const useRingtone = (isRinging) => {
         const t = audioCtxRef.current.currentTime;
         
         // A majestic, emotional Major 9th chord (warm, nostalgic, peaceful)
-        // Frequencies: A3, E4, G#4, B4
         const frequencies = [220.00, 329.63, 415.30, 493.88]; 
         
         const masterGain = audioCtxRef.current.createGain();
+        masterGain.gain.value = 0; // Start completely silent
         
-        // Slow, emotional breath-like swell
-        masterGain.gain.setValueAtTime(0, t);
-        masterGain.gain.linearRampToValueAtTime(0.3, t + 1.5); // Very slow, gentle fade in
-        masterGain.gain.exponentialRampToValueAtTime(0.001, t + 5.5); // Luxurious, long fade out
+        // Ultra-safe fade in and fade out (setTargetAtTime never throws "time in past" errors)
+        masterGain.gain.setTargetAtTime(0.4, t, 0.8); // Fade in
+        masterGain.gain.setTargetAtTime(0, t + 4.0, 0.5); // Fade out
         
         frequencies.forEach(freq => {
-            // Pure sine waves give that crystal clear singing bowl / meditation pad sound
             const osc = audioCtxRef.current.createOscillator();
             osc.type = 'sine';
-            osc.frequency.setValueAtTime(freq, t);
-            
-            // Add a tiny, microscopic wobble (chorus) to make it sound organic and human, not digital
-            const lfo = audioCtxRef.current.createOscillator();
-            lfo.type = 'sine';
-            lfo.frequency.value = 0.15; 
-            const lfoGain = audioCtxRef.current.createGain();
-            lfoGain.gain.value = 1.5; 
-            lfo.connect(lfoGain);
-            lfoGain.connect(osc.frequency);
-            lfo.start(t);
-            lfo.stop(t + 6.0);
+            osc.frequency.value = freq;
             
             osc.connect(masterGain);
             osc.start(t);
@@ -56,6 +43,11 @@ export const useRingtone = (isRinging) => {
         
         masterGain.connect(audioCtxRef.current.destination);
       };
+
+      // Force resume immediately
+      if (audioCtxRef.current.state !== 'running') {
+        audioCtxRef.current.resume().catch(() => {});
+      }
 
       playEmotionalPad();
       // Swell breathes in and out every 6 seconds
