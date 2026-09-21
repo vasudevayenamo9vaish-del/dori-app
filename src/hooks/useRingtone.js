@@ -10,6 +10,11 @@ export const useRingtone = (isRinging) => {
       if (!AudioContext) return;
       
       audioCtxRef.current = new AudioContext();
+      
+      // Attempt to force-wake the audio context (crucial for iOS Safari)
+      if (audioCtxRef.current.state === 'suspended') {
+        audioCtxRef.current.resume().catch(e => console.log('Autoplay blocked by browser', e));
+      }
 
       const playEmotionalPad = () => {
         if (!audioCtxRef.current) return;
