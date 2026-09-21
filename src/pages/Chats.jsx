@@ -53,7 +53,7 @@ const Chats = () => {
     }
   }, [acceptedMatchId]);
 
-  useRingtone(videoCallState === 'receiving');
+  useRingtone(videoCallState === 'receiving' || videoCallState === 'calling');
 
   useBackButton(() => {
     if (videoCallState) {
