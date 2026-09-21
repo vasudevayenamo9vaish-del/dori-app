@@ -1,38 +1,54 @@
 import { useEffect, useRef } from 'react';
 
+// 1. Create the AudioContext GLOBALLY so it persists across renders
+const AudioContext = window.AudioContext || window.webkitAudioContext;
+let sharedAudioCtx = null;
+if (AudioContext) {
+  sharedAudioCtx = new AudioContext();
+}
+
+// 2. The Safari Hack: Attach a global click/touch listener to un-suspend the audio engine
+// This MUST happen directly on a user gesture, which unlocks it forever for async WebSocket calls later!
+if (typeof window !== 'undefined') {
+  const unlockAudio = () => {
+    if (sharedAudioCtx && sharedAudioCtx.state === 'suspended') {
+      sharedAudioCtx.resume().then(() => {
+        console.log("Audio Engine permanently unlocked!");
+        document.removeEventListener('click', unlockAudio);
+        document.removeEventListener('touchstart', unlockAudio);
+      }).catch(e => console.error("Unlock failed", e));
+    }
+  };
+  document.addEventListener('click', unlockAudio);
+  document.addEventListener('touchstart', unlockAudio);
+}
+
 export const useRingtone = (isRinging) => {
-  const audioCtxRef = useRef(null);
   const intervalRef = useRef(null);
 
   useEffect(() => {
-    if (isRinging) {
-      const AudioContext = window.AudioContext || window.webkitAudioContext;
-      if (!AudioContext) return;
+    if (isRinging && sharedAudioCtx) {
       
-      audioCtxRef.current = new AudioContext();
-      
-      // Attempt to force-wake the audio context (crucial for iOS Safari)
-      if (audioCtxRef.current.state === 'suspended') {
-        audioCtxRef.current.resume().catch(e => console.log('Autoplay blocked by browser', e));
+      // Just in case, try to resume again
+      if (sharedAudioCtx.state !== 'running') {
+        sharedAudioCtx.resume().catch(() => {});
       }
 
       const playEmotionalPad = () => {
-        if (!audioCtxRef.current) return;
-        
-        const t = audioCtxRef.current.currentTime;
+        const t = sharedAudioCtx.currentTime;
         
         // A majestic, emotional Major 9th chord (warm, nostalgic, peaceful)
         const frequencies = [220.00, 329.63, 415.30, 493.88]; 
         
-        const masterGain = audioCtxRef.current.createGain();
+        const masterGain = sharedAudioCtx.createGain();
         masterGain.gain.value = 0; // Start completely silent
         
-        // Ultra-safe fade in and fade out (setTargetAtTime never throws "time in past" errors)
+        // Ultra-safe fade in and fade out
         masterGain.gain.setTargetAtTime(0.4, t, 0.8); // Fade in
         masterGain.gain.setTargetAtTime(0, t + 4.0, 0.5); // Fade out
         
         frequencies.forEach(freq => {
-            const osc = audioCtxRef.current.createOscillator();
+            const osc = sharedAudioCtx.createOscillator();
             osc.type = 'sine';
             osc.frequency.value = freq;
             
@@ -41,13 +57,8 @@ export const useRingtone = (isRinging) => {
             osc.stop(t + 6.0);
         });
         
-        masterGain.connect(audioCtxRef.current.destination);
+        masterGain.connect(sharedAudioCtx.destination);
       };
-
-      // Force resume immediately
-      if (audioCtxRef.current.state !== 'running') {
-        audioCtxRef.current.resume().catch(() => {});
-      }
 
       playEmotionalPad();
       // Swell breathes in and out every 6 seconds
@@ -56,18 +67,10 @@ export const useRingtone = (isRinging) => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
       }
-      if (audioCtxRef.current) {
-        audioCtxRef.current.close().catch(e => {});
-        audioCtxRef.current = null;
-      }
     }
 
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
-      if (audioCtxRef.current) {
-        audioCtxRef.current.close().catch(e => {});
-        audioCtxRef.current = null;
-      }
     };
   }, [isRinging]);
 };
