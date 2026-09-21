@@ -1,22 +1,25 @@
 import { useEffect, useRef } from 'react';
 
-// 1. Create the AudioContext GLOBALLY so it persists across renders
+// 1. Create the AudioContext GLOBALLY
 const AudioContext = window.AudioContext || window.webkitAudioContext;
 let sharedAudioCtx = null;
+let ringtoneMasterGain = null;
+
 if (AudioContext) {
   sharedAudioCtx = new AudioContext();
+  ringtoneMasterGain = sharedAudioCtx.createGain();
+  ringtoneMasterGain.gain.value = 0;
+  ringtoneMasterGain.connect(sharedAudioCtx.destination);
 }
 
-// 2. The Safari Hack: Attach a global click/touch listener to un-suspend the audio engine
-// This MUST happen directly on a user gesture, which unlocks it forever for async WebSocket calls later!
+// 2. The Safari Hack
 if (typeof window !== 'undefined') {
   const unlockAudio = () => {
     if (sharedAudioCtx && sharedAudioCtx.state === 'suspended') {
       sharedAudioCtx.resume().then(() => {
-        console.log("Audio Engine permanently unlocked!");
         document.removeEventListener('click', unlockAudio);
         document.removeEventListener('touchstart', unlockAudio);
-      }).catch(e => console.error("Unlock failed", e));
+      }).catch(e => console.error(e));
     }
   };
   document.addEventListener('click', unlockAudio);
@@ -27,50 +30,54 @@ export const useRingtone = (isRinging) => {
   const intervalRef = useRef(null);
 
   useEffect(() => {
-    if (isRinging && sharedAudioCtx) {
-      
-      // Just in case, try to resume again
+    if (isRinging && sharedAudioCtx && ringtoneMasterGain) {
       if (sharedAudioCtx.state !== 'running') {
         sharedAudioCtx.resume().catch(() => {});
       }
 
-      const playEmotionalPad = () => {
+      const playMeditationBowl = () => {
         const t = sharedAudioCtx.currentTime;
         
-        // A majestic, emotional Major 9th chord (warm, nostalgic, peaceful)
-        const frequencies = [220.00, 329.63, 415.30, 493.88]; 
+        // Instantly reset volume for the new swell
+        ringtoneMasterGain.gain.cancelScheduledValues(t);
+        ringtoneMasterGain.gain.setValueAtTime(0, t);
         
-        const masterGain = sharedAudioCtx.createGain();
-        masterGain.gain.value = 0; // Start completely silent
+        // Very soft volume (0.1) to prevent clipping/distortion
+        ringtoneMasterGain.gain.setTargetAtTime(0.1, t, 1.0); // Slow fade in
+        ringtoneMasterGain.gain.setTargetAtTime(0, t + 3.0, 1.0); // Slow fade out
         
-        // Ultra-safe fade in and fade out
-        masterGain.gain.setTargetAtTime(0.4, t, 0.8); // Fade in
-        masterGain.gain.setTargetAtTime(0, t + 4.0, 0.5); // Fade out
+        // Pure 432Hz healing tone (Tibetan bowl effect)
+        const osc1 = sharedAudioCtx.createOscillator();
+        osc1.type = 'sine';
+        osc1.frequency.value = 432.0; 
         
-        frequencies.forEach(freq => {
-            const osc = sharedAudioCtx.createOscillator();
-            osc.type = 'sine';
-            osc.frequency.value = freq;
-            
-            osc.connect(masterGain);
-            osc.start(t);
-            osc.stop(t + 6.0);
-        });
+        const osc2 = sharedAudioCtx.createOscillator();
+        osc2.type = 'sine';
+        osc2.frequency.value = 434.0; // Slightly detuned to create a warm, pulsing throb
         
-        masterGain.connect(sharedAudioCtx.destination);
+        osc1.connect(ringtoneMasterGain);
+        osc2.connect(ringtoneMasterGain);
+        
+        osc1.start(t);
+        osc2.start(t);
+        osc1.stop(t + 5.0);
+        osc2.stop(t + 5.0);
       };
 
-      playEmotionalPad();
-      // Swell breathes in and out every 6 seconds
-      intervalRef.current = setInterval(playEmotionalPad, 6000);
-    } else {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
+      playMeditationBowl();
+      // Breathe in and out every 5 seconds
+      intervalRef.current = setInterval(playMeditationBowl, 5000);
     }
 
+    // CLEANUP: Instantly kill the audio if the call connects or ends!
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
+      if (ringtoneMasterGain && sharedAudioCtx) {
+        const t = sharedAudioCtx.currentTime;
+        ringtoneMasterGain.gain.cancelScheduledValues(t);
+        // Instantly fade out to 0 in 0.1 seconds (stops the background noise immediately)
+        ringtoneMasterGain.gain.setTargetAtTime(0, t, 0.1); 
+      }
     };
   }, [isRinging]);
 };
