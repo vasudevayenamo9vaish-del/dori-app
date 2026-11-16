@@ -10,13 +10,25 @@ import './Auth.css'; // Reuse auth styles
 
 const Onboarding = () => {
   const { user, fetchProfile } = useAuth();
+  
+  // Extract SSO metadata (Google name & picture)
+  const ssoMeta = user?.user_metadata || {};
+  const ssoName = ssoMeta.given_name || ssoMeta.first_name || (ssoMeta.full_name || ssoMeta.name ? (ssoMeta.full_name || ssoMeta.name).trim().split(' ')[0] : '');
+  const ssoAvatar = ssoMeta.avatar_url || ssoMeta.picture || '';
+
   const [loading, setLoading] = useState(false);
-  const [firstName, setFirstName] = useState('');
+  const [firstName, setFirstName] = useState(ssoName || '');
   const [dob, setDob] = useState('');
   const [country, setCountry] = useState('');
   const [gender, setGender] = useState('');
   const [bio, setBio] = useState('');
   const [error, setError] = useState('');
+
+  React.useEffect(() => {
+    if (ssoName && !firstName) {
+      setFirstName(ssoName);
+    }
+  }, [user]);
 
   const calculateAge = (dobString) => {
     const today = new Date();
@@ -51,8 +63,7 @@ const Onboarding = () => {
           country: country,
           gender: gender,
           bio: bio,
-          // Placeholder for optional photo later
-          avatar_url: `https://api.dicebear.com/7.x/notionists/svg?seed=${firstName}&backgroundColor=F8F4ED`
+          avatar_url: ssoAvatar || `https://api.dicebear.com/7.x/notionists/svg?seed=${encodeURIComponent(firstName)}&backgroundColor=F8F4ED`
         }
       ]);
 
@@ -95,6 +106,27 @@ const Onboarding = () => {
             required
             className="auth-input"
           />
+          {ssoName && firstName !== ssoName && (
+            <button
+              type="button"
+              onClick={() => setFirstName(ssoName)}
+              style={{
+                alignSelf: 'flex-start',
+                marginTop: '-8px',
+                marginBottom: '10px',
+                marginLeft: '4px',
+                padding: '4px 10px',
+                borderRadius: '16px',
+                border: '1px solid rgba(217,119,106,0.3)',
+                background: 'rgba(217,119,106,0.1)',
+                color: 'var(--primary-teal)',
+                fontSize: '12px',
+                cursor: 'pointer'
+              }}
+            >
+              ✨ Use Google name: <strong>{ssoName}</strong>
+            </button>
+          )}
           
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
             <label style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '4px', marginLeft: '12px' }}>Date of Birth *</label>

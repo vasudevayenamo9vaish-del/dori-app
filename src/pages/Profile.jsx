@@ -12,15 +12,49 @@ const Profile = () => {
   const navigate = useNavigate();
   const { user, profile, fetchProfile, signOut } = useAuth();
   
+  // Extract SSO metadata (Google name & picture)
+  const ssoMeta = user?.user_metadata || {};
+  const ssoName = ssoMeta.given_name || ssoMeta.first_name || (ssoMeta.full_name || ssoMeta.name ? (ssoMeta.full_name || ssoMeta.name).trim().split(' ')[0] : '');
+  const ssoAvatar = ssoMeta.avatar_url || ssoMeta.picture || '';
+
   const [loading, setLoading] = useState(false);
-  const [firstName, setFirstName] = useState(profile?.first_name || '');
+  const [firstName, setFirstName] = useState(() => {
+    if (profile?.first_name && profile.first_name !== 'Dori User') return profile.first_name;
+    return ssoName || profile?.first_name || '';
+  });
   const [dob, setDob] = useState(profile?.dob || '');
   const [country, setCountry] = useState(profile?.country || '');
   const [gender, setGender] = useState(profile?.gender || '');
   const [bio, setBio] = useState(profile?.bio || '');
-  const [avatarUrl, setAvatarUrl] = useState(profile?.avatar_url || '');
+  const [avatarUrl, setAvatarUrl] = useState(() => {
+    if (profile?.avatar_url && !profile.avatar_url.includes('seed=DoriUser')) return profile.avatar_url;
+    return ssoAvatar || profile?.avatar_url || '';
+  });
   const [message, setMessage] = useState('');
   const [blockedUsers, setBlockedUsers] = useState([]);
+
+  // Synchronize form fields when profile or SSO user loads
+  React.useEffect(() => {
+    if (profile) {
+      if (profile.first_name && profile.first_name !== 'Dori User') {
+        setFirstName(profile.first_name);
+      } else if (ssoName) {
+        setFirstName(ssoName);
+      }
+      if (profile.dob) setDob(profile.dob);
+      if (profile.country) setCountry(profile.country);
+      if (profile.gender) setGender(profile.gender);
+      if (profile.bio) setBio(profile.bio);
+      if (profile.avatar_url && !profile.avatar_url.includes('seed=DoriUser')) {
+        setAvatarUrl(profile.avatar_url);
+      } else if (ssoAvatar) {
+        setAvatarUrl(ssoAvatar);
+      }
+    } else if (ssoName) {
+      setFirstName(ssoName);
+      if (ssoAvatar) setAvatarUrl(ssoAvatar);
+    }
+  }, [profile, user]);
 
   React.useEffect(() => {
     async function fetchBlockedUsers() {
@@ -222,6 +256,24 @@ const Profile = () => {
               <input type="file" accept="image/*" onChange={handleImageUpload} style={{ display: 'none' }} />
             </label>
           </div>
+          {ssoAvatar && avatarUrl !== ssoAvatar && (
+            <button
+              type="button"
+              onClick={() => setAvatarUrl(ssoAvatar)}
+              style={{
+                marginTop: '10px',
+                padding: '4px 12px',
+                borderRadius: '16px',
+                border: '1px solid rgba(217,119,106,0.25)',
+                background: 'rgba(255,255,255,0.85)',
+                color: 'var(--primary-teal, #2d4f48)',
+                fontSize: '11px',
+                cursor: 'pointer'
+              }}
+            >
+              Use Google Photo
+            </button>
+          )}
         </div>
 
         <form onSubmit={handleSave} className="profile-form">
@@ -234,6 +286,28 @@ const Profile = () => {
               required
               className="profile-input"
             />
+            {ssoName && firstName !== ssoName && (
+              <button
+                type="button"
+                onClick={() => setFirstName(ssoName)}
+                style={{
+                  marginTop: '8px',
+                  padding: '6px 12px',
+                  borderRadius: '20px',
+                  border: '1px solid rgba(217,119,106,0.3)',
+                  background: 'rgba(217,119,106,0.08)',
+                  color: 'var(--primary-teal, #2d4f48)',
+                  fontSize: '12px',
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  width: 'fit-content'
+                }}
+              >
+                ✨ Tap to use Google name: <strong>{ssoName}</strong>
+              </button>
+            )}
           </div>
 
           <div className="form-group">
