@@ -3,8 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { motion } from 'framer-motion';
-import { ArrowLeft, LogOut, User, Camera } from 'lucide-react';
+import { ArrowLeft, LogOut, User, Camera, Sparkles } from 'lucide-react';
 import { COUNTRIES } from '../utils/countries';
+import { getDefaultAvatar, calculateAgeFromDob } from '../utils/avatarCatalog';
+import AvatarSelector from '../components/AvatarSelector';
 import './Profile.css';
 
 
@@ -18,6 +20,7 @@ const Profile = () => {
   const ssoAvatar = ssoMeta.avatar_url || ssoMeta.picture || '';
 
   const [loading, setLoading] = useState(false);
+  const [showAvatarModal, setShowAvatarModal] = useState(false);
   const [firstName, setFirstName] = useState(() => {
     if (profile?.first_name && profile.first_name !== 'Dori User') return profile.first_name;
     return ssoName || profile?.first_name || '';
@@ -28,7 +31,9 @@ const Profile = () => {
   const [bio, setBio] = useState(profile?.bio || '');
   const [avatarUrl, setAvatarUrl] = useState(() => {
     if (profile?.avatar_url && !profile.avatar_url.includes('seed=DoriUser')) return profile.avatar_url;
-    return ssoAvatar || profile?.avatar_url || '';
+    if (ssoAvatar) return ssoAvatar;
+    if (profile?.gender) return getDefaultAvatar({ gender: profile.gender, dob: profile.dob }).url;
+    return getDefaultAvatar({ gender: 'Non-binary' }).url;
   });
   const [message, setMessage] = useState('');
   const [blockedUsers, setBlockedUsers] = useState([]);
@@ -45,16 +50,49 @@ const Profile = () => {
       if (profile.country) setCountry(profile.country);
       if (profile.gender) setGender(profile.gender);
       if (profile.bio) setBio(profile.bio);
-      if (profile.avatar_url && !profile.avatar_url.includes('seed=DoriUser')) {
-        setAvatarUrl(profile.avatar_url);
+
+      // Check if avatar needs gender-matching correction
+      const currentAv = profile.avatar_url;
+      const isCustomUpload = currentAv && (currentAv.includes('supabase.co') || currentAv.includes('blob:'));
+      if (!isCustomUpload && profile.gender) {
+        // If avatar has the old generic seed pattern or doesn't match gender
+        if (!currentAv || currentAv.includes('seed=DoriUser') || currentAv.includes(`seed=${profile.first_name}`)) {
+          const match = getDefaultAvatar({ gender: profile.gender, dob: profile.dob });
+          setAvatarUrl(match.url);
+        } else {
+          setAvatarUrl(currentAv);
+        }
+      } else if (currentAv) {
+        setAvatarUrl(currentAv);
       } else if (ssoAvatar) {
         setAvatarUrl(ssoAvatar);
+      } else if (profile.gender) {
+        setAvatarUrl(getDefaultAvatar({ gender: profile.gender, dob: profile.dob }).url);
       }
     } else if (ssoName) {
       setFirstName(ssoName);
       if (ssoAvatar) setAvatarUrl(ssoAvatar);
     }
   }, [profile, user]);
+
+  const handleGenderChange = (newGender) => {
+    setGender(newGender);
+    // If user hasn't uploaded a custom photo, auto-update avatar to match new gender & age!
+    const isCustomUpload = avatarUrl && (avatarUrl.includes('supabase.co') || avatarUrl.includes('blob:'));
+    if (!isCustomUpload) {
+      const match = getDefaultAvatar({ gender: newGender, dob });
+      if (match) setAvatarUrl(match.url);
+    }
+  };
+
+  const handleDobChange = (newDob) => {
+    setDob(newDob);
+    const isCustomUpload = avatarUrl && (avatarUrl.includes('supabase.co') || avatarUrl.includes('blob:'));
+    if (!isCustomUpload && gender) {
+      const match = getDefaultAvatar({ gender, dob: newDob });
+      if (match) setAvatarUrl(match.url);
+    }
+  };
 
   React.useEffect(() => {
     async function fetchBlockedUsers() {
@@ -232,44 +270,54 @@ const Profile = () => {
         animate={{ opacity: 1, y: 0 }}
       >
         <div className="avatar-section">
-          <div className="profile-avatar" style={{ position: 'relative' }}>
+          <div 
+            className="profile-avatar" 
+            style={{ position: 'relative', cursor: 'pointer' }}
+            onClick={() => setShowAvatarModal(true)}
+            title="Tap to choose avatar"
+          >
             {avatarUrl ? (
               <img src={avatarUrl} alt="Avatar" />
             ) : (
               <User size={40} color="var(--primary-teal)" />
             )}
-            <label className="avatar-upload-btn" style={{
-              position: 'absolute',
-              bottom: 0,
-              right: 0,
-              background: 'var(--primary-teal)',
-              width: '32px',
-              height: '32px',
-              borderRadius: '50%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: 'pointer',
-              boxShadow: '0 2px 5px rgba(0,0,0,0.2)'
-            }}>
-              <Camera size={16} color="white" />
-              <input type="file" accept="image/*" onChange={handleImageUpload} style={{ display: 'none' }} />
+            <button 
+              type="button"
+              className="avatar-edit-overlay-btn"
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowAvatarModal(true);
+              }}
+              title="Change avatar"
+            >
+              <Sparkles size={14} color="#fff" />
+            </button>
+          </div>
+
+          <div className="avatar-action-row">
+            <button
+              type="button"
+              className="avatar-choose-btn"
+              onClick={() => setShowAvatarModal(true)}
+            >
+              <Sparkles size={14} /> Choose Avatar
+            </button>
+            <label className="avatar-upload-label-btn">
+              <Camera size={14} /> Upload Photo
+              <input 
+                type="file" 
+                accept="image/*" 
+                onChange={handleImageUpload} 
+                style={{ display: 'none' }} 
+              />
             </label>
           </div>
+
           {ssoAvatar && avatarUrl !== ssoAvatar && (
             <button
               type="button"
               onClick={() => setAvatarUrl(ssoAvatar)}
-              style={{
-                marginTop: '10px',
-                padding: '4px 12px',
-                borderRadius: '16px',
-                border: '1px solid rgba(217,119,106,0.25)',
-                background: 'rgba(255,255,255,0.85)',
-                color: 'var(--primary-teal, #2d4f48)',
-                fontSize: '11px',
-                cursor: 'pointer'
-              }}
+              className="avatar-google-btn"
             >
               Use Google Photo
             </button>
@@ -315,7 +363,7 @@ const Profile = () => {
             <input
               type="date"
               value={dob}
-              onChange={(e) => setDob(e.target.value)}
+              onChange={(e) => handleDobChange(e.target.value)}
               required
               className="profile-input"
             />
@@ -325,7 +373,7 @@ const Profile = () => {
             <label>Gender</label>
             <select 
               value={gender} 
-              onChange={(e) => setGender(e.target.value)} 
+              onChange={(e) => handleGenderChange(e.target.value)} 
               required 
               className="profile-input"
             >
@@ -427,6 +475,26 @@ const Profile = () => {
           Delete Account
         </button>
       </motion.div>
+
+      <AvatarSelector
+        isOpen={showAvatarModal}
+        onClose={() => setShowAvatarModal(false)}
+        currentAvatarUrl={avatarUrl}
+        onSelectAvatar={(newUrl) => setAvatarUrl(newUrl)}
+        userGender={gender}
+        userDob={dob}
+        onUploadClick={() => {
+          setShowAvatarModal(false);
+          document.getElementById('hidden-avatar-file-input')?.click();
+        }}
+      />
+      <input
+        id="hidden-avatar-file-input"
+        type="file"
+        accept="image/*"
+        onChange={handleImageUpload}
+        style={{ display: 'none' }}
+      />
     </div>
   );
 };

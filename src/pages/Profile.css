@@ -47,8 +47,96 @@
 
 .avatar-section {
   display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 28px;
+}
+
+.avatar-edit-overlay-btn {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  background: var(--terracotta-accent, #c86d51);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
   justify-content: center;
-  margin-bottom: 32px;
+  cursor: pointer;
+  border: 2px solid white;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  transition: transform 0.2s ease;
+}
+
+.avatar-edit-overlay-btn:hover {
+  transform: scale(1.1);
+}
+
+.avatar-action-row {
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.avatar-choose-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 20px;
+  border: 1px solid rgba(200, 109, 81, 0.35);
+  background: rgba(200, 109, 81, 0.08);
+  color: var(--terracotta-accent, #c86d51);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.avatar-choose-btn:hover {
+  background: var(--terracotta-accent, #c86d51);
+  color: white;
+  box-shadow: 0 4px 12px rgba(200, 109, 81, 0.25);
+}
+
+.avatar-upload-label-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 20px;
+  border: 1px solid rgba(45, 79, 72, 0.2);
+  background: white;
+  color: var(--primary-teal, #2d4f48);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.avatar-upload-label-btn:hover {
+  background: rgba(45, 79, 72, 0.06);
+}
+
+.avatar-google-btn {
+  margin-top: 10px;
+  padding: 4px 12px;
+  border-radius: 16px;
+  border: 1px solid rgba(217, 119, 106, 0.25);
+  background: rgba(255, 255, 255, 0.85);
+  color: var(--primary-teal, #2d4f48);
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.avatar-google-btn:hover {
+  background: white;
+  border-color: var(--terracotta-accent, #c86d51);
 }
 
 .profile-avatar {

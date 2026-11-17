@@ -1,5 +1,6 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { supabase } from '../lib/supabase';
+import { getDefaultAvatar } from '../utils/avatarCatalog';
 
 const AuthContext = createContext();
 
@@ -65,7 +66,7 @@ export const AuthProvider = ({ children }) => {
         }
 
         const initialAvatar = meta.avatar_url || meta.picture || 
-          `https://api.dicebear.com/7.x/notionists/svg?seed=${encodeURIComponent(initialName)}&backgroundColor=F8F4ED`;
+          getDefaultAvatar({ gender: 'Non-binary' }).url;
 
         const { data: newProfile, error: insertError } = await supabase
           .from('profiles')

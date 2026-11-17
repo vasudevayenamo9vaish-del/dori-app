@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { supabase } from '../lib/supabase';
-import { Camera } from 'lucide-react';
+import { Camera, Sparkles } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { COUNTRIES } from '../utils/countries';
 import { motion } from 'framer-motion';
+import { getDefaultAvatar } from '../utils/avatarCatalog';
+import AvatarSelector from './AvatarSelector';
 import ThreadIcon from './ThreadIcon';
 import './Auth.css'; // Reuse auth styles
 
@@ -17,11 +19,16 @@ const Onboarding = () => {
   const ssoAvatar = ssoMeta.avatar_url || ssoMeta.picture || '';
 
   const [loading, setLoading] = useState(false);
+  const [showAvatarModal, setShowAvatarModal] = useState(false);
   const [firstName, setFirstName] = useState(ssoName || '');
   const [dob, setDob] = useState('');
   const [country, setCountry] = useState('');
   const [gender, setGender] = useState('');
   const [bio, setBio] = useState('');
+  const [avatarUrl, setAvatarUrl] = useState(() => {
+    if (ssoAvatar) return ssoAvatar;
+    return getDefaultAvatar({ gender: 'Non-binary' }).url;
+  });
   const [error, setError] = useState('');
 
   React.useEffect(() => {
@@ -29,6 +36,22 @@ const Onboarding = () => {
       setFirstName(ssoName);
     }
   }, [user]);
+
+  const handleGenderChange = (newGender) => {
+    setGender(newGender);
+    if (!avatarUrl || avatarUrl.includes('api.dicebear.com')) {
+      const match = getDefaultAvatar({ gender: newGender, dob });
+      if (match) setAvatarUrl(match.url);
+    }
+  };
+
+  const handleDobChange = (newDob) => {
+    setDob(newDob);
+    if ((!avatarUrl || avatarUrl.includes('api.dicebear.com')) && gender) {
+      const match = getDefaultAvatar({ gender, dob: newDob });
+      if (match) setAvatarUrl(match.url);
+    }
+  };
 
   const calculateAge = (dobString) => {
     const today = new Date();
@@ -63,7 +86,7 @@ const Onboarding = () => {
           country: country,
           gender: gender,
           bio: bio,
-          avatar_url: ssoAvatar || `https://api.dicebear.com/7.x/notionists/svg?seed=${encodeURIComponent(firstName)}&backgroundColor=F8F4ED`
+          avatar_url: avatarUrl || ssoAvatar || getDefaultAvatar({ gender, dob }).url
         }
       ]);
 
@@ -95,6 +118,46 @@ const Onboarding = () => {
         <div className="community-guidelines" style={{ marginBottom: '20px', padding: '16px', background: 'rgba(217,119,106,0.1)', borderRadius: '16px', textAlign: 'left', fontSize: '13px', color: 'var(--primary-teal)' }}>
           <strong>🌿 Community Guidelines</strong>
           <p style={{ marginTop: '6px' }}>Dori is a safe space. Be kind. Be real. Protect each other. We suggest keeping all conversations within Dori and never sharing personal details.</p>
+        </div>
+
+        {/* Pre-built Avatar Preview & Selector */}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '20px' }}>
+          <div 
+            style={{ 
+              width: '88px', 
+              height: '88px', 
+              borderRadius: '50%', 
+              overflow: 'hidden', 
+              background: '#fff', 
+              boxShadow: '0 4px 14px rgba(0,0,0,0.1)',
+              border: '3px solid white',
+              cursor: 'pointer'
+            }}
+            onClick={() => setShowAvatarModal(true)}
+            title="Tap to choose avatar"
+          >
+            <img src={avatarUrl} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          </div>
+          <button
+            type="button"
+            onClick={() => setShowAvatarModal(true)}
+            style={{
+              marginTop: '8px',
+              padding: '6px 14px',
+              borderRadius: '20px',
+              border: '1px solid rgba(200, 109, 81, 0.3)',
+              background: 'rgba(200, 109, 81, 0.08)',
+              color: 'var(--terracotta-accent, #c86d51)',
+              fontSize: '12px',
+              fontWeight: '600',
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '5px'
+            }}
+          >
+            <Sparkles size={13} /> Choose Avatar
+          </button>
         </div>
 
         <form onSubmit={handleSaveProfile} className="auth-form">
@@ -133,7 +196,7 @@ const Onboarding = () => {
             <input
               type="date"
               value={dob}
-              onChange={(e) => setDob(e.target.value)}
+              onChange={(e) => handleDobChange(e.target.value)}
               required
               className="auth-input"
             />
@@ -141,7 +204,7 @@ const Onboarding = () => {
 
           <select 
             value={gender} 
-            onChange={(e) => setGender(e.target.value)} 
+            onChange={(e) => handleGenderChange(e.target.value)} 
             required 
             className="auth-input"
           >
@@ -179,6 +242,15 @@ const Onboarding = () => {
           </button>
         </form>
       </motion.div>
+
+      <AvatarSelector
+        isOpen={showAvatarModal}
+        onClose={() => setShowAvatarModal(false)}
+        currentAvatarUrl={avatarUrl}
+        onSelectAvatar={(newUrl) => setAvatarUrl(newUrl)}
+        userGender={gender}
+        userDob={dob}
+      />
     </div>
   );
 };
