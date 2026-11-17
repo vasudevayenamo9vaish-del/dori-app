@@ -24,36 +24,43 @@
 
 body {
   font-family: 'Outfit', sans-serif;
-  background-color: #E2E8F0; /* Darker bg outside the mobile app container */
+  background-color: var(--bg-cream);
   color: var(--text-dark);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: stretch;
   min-height: 100vh;
+  min-height: 100dvh;
 }
 
-/* Mobile App Wrapper */
+/* Mobile App Wrapper - Full Screen Edge-to-Edge */
 #root {
   width: 100%;
-  max-width: 414px; /* iPhone Max width */
-  height: 100vh;
-  max-height: 896px; /* iPhone Max height */
+  min-height: 100vh;
+  min-height: 100dvh;
   background-color: var(--bg-cream);
   position: relative;
-  overflow: hidden; /* Prevent scrolling outside */
   display: flex;
   flex-direction: column;
 }
 
-@media (min-width: 415px) {
+/* Tablet & Desktop View: Cleanly centered mobile view without fake phone frames */
+@media (min-width: 768px) {
+  body {
+    background-color: #EDE8DE; /* Soft warm luxury backdrop */
+    align-items: center;
+  }
+
   #root {
-    height: 90vh;
-    margin: 0 auto;
-    border-radius: 40px;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-    border: 8px solid #FFFFFF;
+    max-width: 460px;
+    height: 100vh;
+    height: 100dvh;
+    border-left: 1px solid rgba(0, 0, 0, 0.08);
+    border-right: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 0 40px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
   }
 }
 
